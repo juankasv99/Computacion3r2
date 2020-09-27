@@ -1,0 +1,73 @@
+PROBLEMA ASSERTS CTRACK:
+nombre del alumno
+apellidos del alumno
+0000000
+
+Vertices: 7
+Edges: 24
+TEST NOK 01
+ASSERT AssertNULL a CTrack::AddFirst D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (383). Cond: pEdge != NULL
+TEST NOK 02
+ASSERT AssertTrackSenseGraf a CTrack::AddFirst D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (384). Cond: m_pGraph != NULL
+TEST OK 03
+TEST NOK 04
+ASSERT AssertNoArestaDelGraf a CTrack::AddFirst D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (385). Cond: m_pGraph->MemberP(pEdge)
+TEST NOK 05
+SUBTEST 05.1 OK
+SUBTEST 05.2 NOK
+ASSERT AssertArestesDesconectades a CTrack::AddFirst D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (386). Cond: m_Edges.empty() || pEdge->m_pDestination == m_Edges.front()->m_pOrigin
+TEST NOK 06
+ASSERT AssertNULL a CTrack::AddLast D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (390). Cond: pEdge != NULL
+TEST NOK 07
+ASSERT AssertTrackSenseGraf a CTrack::AddLast D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (391). Cond: m_pGraph != NULL
+TEST OK 08
+TEST NOK 09
+ASSERT AssertNoArestaDelGraf a CTrack::AddLast D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (392). Cond: m_pGraph->MemberP(pEdge)
+TEST NOK 10
+SUBTEST 10.1 OK
+SUBTEST 10.2 NOK
+ASSERT AssertArestesDesconectades a CTrack::AddLast D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.h (393). Cond: m_Edges.empty() || m_Edges.front()->m_pDestination == pEdge->m_pOrigin
+TEST NOK 11
+ASSERT AssertTrackSenseGraf a CTrack::AppendBefore D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (388). Cond: m_pGraph != NULL
+TEST NOK 12
+ASSERT AssertTrackSenseGraf a CTrack::AppendBefore D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (389). Cond: t.m_pGraph != NULL
+TEST NOK 13
+ASSERT AssertGrafsDiferents a CTrack::AppendBefore D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (390). Cond: m_pGraph == t.m_pGraph
+TEST OK 14
+SUBTEST OK 14.1
+SUBTEST OK 14.2
+TEST OK 15
+SUBTEST OK 15.1
+SUBTEST OK 15.2
+TEST OK 16
+SUBTEST OK 16.1
+SUBTEST OK 16.2
+SUBTEST OK 16.3
+TEST NOK 17
+SUBTEST OK 17.1
+SUBTEST OK 17.2
+SUBTEST NOK 17.3
+ASSERT AssertArestesDesconectades a CTrack::AppendBefore D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (391). Cond: m_Edges.empty() || t.m_Edges.empty() || t.m_Edges.back()->m_pDestination == m_Edges.front()->m_pOrigin
+TEST NOK 18
+ASSERT AssertTrackSenseGraf a CTrack::Append D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (375). Cond: m_pGraph != NULL
+TEST NOK 19
+ASSERT AssertTrackSenseGraf a CTrack::Append D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (376). Cond: t.m_pGraph != NULL
+TEST NOK 20
+ASSERT AssertGrafsDiferents a CTrack::Append D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (377). Cond: m_pGraph == t.m_pGraph
+TEST OK 21
+SUBTEST OK 21.1
+SUBTEST OK 21.2
+TEST OK 22
+SUBTEST OK 22.1
+SUBTEST OK 22.2
+TEST OK 23
+SUBTEST OK 23.1
+SUBTEST OK 23.2
+SUBTEST OK 23.3
+TEST NOK 24
+SUBTEST OK 24.1
+SUBTEST OK 24.2
+SUBTEST NOK 24.3
+ASSERT AssertArestesDesconectades a CTrack::Append D:\Universitat Autònoma de Barcelona\DissenyAlgorismes - Documentos\TDA\T1 Especificacio formal\Exercici CTrack Asserts\CTrackAsserts Professor\CTrackAsserts\Graph.cpp (378). Cond: m_Edges.empty() || t.m_Edges.empty() || m_Edges.back()->m_pDestination == t.m_Edges.front()->m_pOrigin
+RUN: "CTrackAsserts Professor\x64\Debug\CTrackAsserts.exe"
+TOTAL TIME=0.007000

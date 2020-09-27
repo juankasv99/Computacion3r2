@@ -1,0 +1,118 @@
+﻿  CTrackAsserts.cpp
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(158,17): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(158,38): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(162,17): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(162,38): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(210,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(211,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(212,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(213,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(219,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(220,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(221,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(222,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(227,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(228,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(229,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(230,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(234,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(235,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(236,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(237,4): error C3861: 'min': identifier not found
+  Graph.cpp
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(158,17): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(158,38): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(162,17): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(162,38): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(210,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(211,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(212,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(213,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(219,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(220,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(221,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(222,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(227,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(228,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(229,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(230,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(234,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(235,4): error C3861: 'max': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(236,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(237,4): error C3861: 'min': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(293,2): error C3861: 'invariant': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(317,2): error C3861: 'invariant': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(374,14): error C2039: 'invariant': is not a member of 'CGraph'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.h(323): message : see declaration of 'CGraph'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,20): error C2065: 'm_Vertices': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,20): error C2672: 'begin': no matching overloaded function found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C2893: Failed to specialize function template 'unknown-type std::begin(_Container &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\xutility(1961): message : see declaration of 'std::begin'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): message : With the following template arguments:
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): message : '_Container=unknown-type'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C2784: 'const _Elem *std::begin(std::initializer_list<_Elem>) noexcept': could not deduce template argument for 'std::initializer_list<_Elem>' from 'unknown-type'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\initializer_list(57): message : see declaration of 'std::begin'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,20): error C2672: 'end': no matching overloaded function found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C2893: Failed to specialize function template 'unknown-type std::end(_Container &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\xutility(1971): message : see declaration of 'std::end'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): message : With the following template arguments:
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): message : '_Container=unknown-type'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C2784: 'const _Elem *std::end(std::initializer_list<_Elem>) noexcept': could not deduce template argument for 'std::initializer_list<_Elem>' from 'unknown-type'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\initializer_list(63): message : see declaration of 'std::end'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C3536: '<begin>$L0': cannot be used before it is initialized
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C3536: '<end>$L0': cannot be used before it is initialized
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,30): error C2100: illegal indirection
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(376,32): error C2440: 'initializing': cannot convert from 'int' to 'CVertex &'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(378,9): error C3861: 'MemberP': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,18): error C2065: 'm_Edges': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,18): error C2672: 'begin': no matching overloaded function found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C2893: Failed to specialize function template 'unknown-type std::begin(_Container &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\xutility(1961): message : see declaration of 'std::begin'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): message : With the following template arguments:
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): message : '_Container=unknown-type'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C2784: 'const _Elem *std::begin(std::initializer_list<_Elem>) noexcept': could not deduce template argument for 'std::initializer_list<_Elem>' from 'unknown-type'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\initializer_list(57): message : see declaration of 'std::begin'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,18): error C2672: 'end': no matching overloaded function found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C2893: Failed to specialize function template 'unknown-type std::end(_Container &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\xutility(1971): message : see declaration of 'std::end'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): message : With the following template arguments:
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): message : '_Container=unknown-type'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C2784: 'const _Elem *std::end(std::initializer_list<_Elem>) noexcept': could not deduce template argument for 'std::initializer_list<_Elem>' from 'unknown-type'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.26.28801\include\initializer_list(63): message : see declaration of 'std::end'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C3536: '<begin>$L2': cannot be used before it is initialized
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C3536: '<end>$L2': cannot be used before it is initialized
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,25): error C2100: illegal indirection
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(383,27): error C2440: 'initializing': cannot convert from 'int' to 'CEdge &'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(384,8): error C3861: 'MemberP': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(385,8): error C3861: 'MemberP': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(386,7): error C2065: 'm_Directed': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(391,9): error C3861: 'MemberP': identifier not found
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(397,35): error C2065: 'm_Vertices': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(397,60): error C2065: 'm_Vertices': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(400,46): error C2065: 'm_Vertices': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(404,17): error C2059: syntax error: ')'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(405,1): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(415,1): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(416,97): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(418,2): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(419,1): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(424,1): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(425,107): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(427,2): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(428,1): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(432,25): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(434,19): error C2065: 'm_Edges': undeclared identifier
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(434,28): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,5): error C2947: expecting '>' to terminate template-argument-list, found '+='
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,10): error C3927: '->': trailing return type is not allowed after a non-function declarator
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,21): error C3613: missing return type after '->' ('int' assumed)
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,12): error C2146: syntax error: missing ';' before identifier 'm_pOrigin'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,21): error C2143: syntax error: missing ';' before '->'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,21): error C2143: syntax error: missing ')' before '->'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(435,21): error C2059: syntax error: '->'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(437,2): error C2059: syntax error: 'return'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(438,1): error C2059: syntax error: '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(438,1): error C2143: syntax error: missing ';' before '}'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(442,33): error C2143: syntax error: missing ';' before '{'
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\ADA CTrackAsserts V1\CTrackAsserts\CTrackAsserts\Graph.cpp(442,33): error C2447: '{': missing function header (old-style formal list?)
+  Generating Code...
