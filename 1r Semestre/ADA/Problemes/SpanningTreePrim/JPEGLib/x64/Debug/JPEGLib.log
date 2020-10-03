@@ -1,0 +1,72 @@
+﻿  djpeg.c
+  jcapimin.c
+  jcapistd.c
+  jccoefct.c
+  jccolor.c
+  jcdctmgr.c
+  jchuff.c
+  jcinit.c
+  jcmainct.c
+  jcmarker.c
+  jcmaster.c
+  jcomapi.c
+  jcparam.c
+  jcphuff.c
+  jcprepct.c
+  jcsample.c
+  jctrans.c
+  jdapimin.c
+  jdapistd.c
+  jdatadst.c
+  Generating Code...
+  Compiling...
+  jdatasrc.c
+  jdcoefct.c
+  jdcolor.c
+  jddctmgr.c
+  jdhuff.c
+  jdinput.c
+  jdmainct.c
+  jdmarker.c
+  jdmaster.c
+  jdmerge.c
+  jdphuff.c
+  jdpostct.c
+  jdsample.c
+  jdtrans.c
+  jerror.c
+  jfdctflt.c
+  jfdctfst.c
+  jfdctint.c
+  jidctflt.c
+  jidctfst.c
+  Generating Code...
+  Compiling...
+  jidctint.c
+  jidctred.c
+  jmemansi.c
+  jmemmgr.c
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\JPEGLib\jmemmgr.c(307,53): warning C4267: '+=': conversion from 'size_t' to 'long', possible loss of data
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\JPEGLib\jmemmgr.c(367,70): warning C4267: '+=': conversion from 'size_t' to 'long', possible loss of data
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\JPEGLib\jmemmgr.c(977,46): warning C4267: '-=': conversion from 'size_t' to 'long', possible loss of data
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\JPEGLib\jmemmgr.c(991,46): warning C4267: '-=': conversion from 'size_t' to 'long', possible loss of data
+  jquant1.c
+  jquant2.c
+  jutils.c
+  rdbmp.c
+  rdcolmap.c
+  rdgif.c
+  rdppm.c
+  rdrle.c
+  rdswitch.c
+  rdtarga.c
+  transupp.c
+  wrbmp.c
+  wrgif.c
+  wrppm.c
+  wrrle.c
+  wrtarga.c
+  Generating Code...
+  JPEGLib.vcxproj -> C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\x64\Debug\JPEGLib.lib
+  copy "x64\Debug\JPEGLib.pdb" "C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\x64\Debug\"
+          1 archivo(s) copiado(s).
