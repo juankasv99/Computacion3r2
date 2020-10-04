@@ -1,2 +1,0 @@
-C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\x64\Debug\JPEGLib.pdb
-C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\SpanningTreePrim\JPEGLib\x64\Debug\JPEGLib.pdb

@@ -18,9 +18,9 @@
 // IDENTIFICACION DE LOS ALUMNOS ===============================================
 // =============================================================================
 
-CString NombreAlumno1 = "nombre del alumno 1";
-CString ApellidosAlumno1 = "apellidos del alumno 1";
-CString NIUAlumno1 = "0000000"; // NIU alumno1
+CString NombreAlumno1 = "Juan Carlos";
+CString ApellidosAlumno1 = "Soriano Valle";
+CString NIUAlumno1 = "1493037"; // NIU alumno1
 
 bool CheckNIU(const char* niu)
 {

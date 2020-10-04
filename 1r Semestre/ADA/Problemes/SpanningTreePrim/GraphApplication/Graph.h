@@ -292,6 +292,9 @@ public:
 	list<CEdge*> m_Edges;
 	// Atributos de Dijkstra
 	double m_DijkstraDistance;
+	
+	//Atributs Prim
+	bool inSpamTree;
 
 	// Métodes
 	CEdge* FindEdge(const char* name);
