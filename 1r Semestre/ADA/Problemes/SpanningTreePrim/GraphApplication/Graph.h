@@ -294,7 +294,7 @@ public:
 	double m_DijkstraDistance;
 	
 	//Atributs Prim
-	bool inSpamTree;
+	bool m_inSpamTree;
 
 	// Métodes
 	CEdge* FindEdge(const char* name);

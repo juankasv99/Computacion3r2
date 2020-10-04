@@ -9,48 +9,55 @@ using namespace std;
 // =============================================================================
 
 struct comparator {
-	bool operator()(CEdge &pE1, CEdge &pE2) { return pE1.m_Length > pE2.m_Length; }
+	bool operator()(CEdge* pE1, CEdge* pE2) { return pE1->m_Length > pE2->m_Length; }
 };
+
 
 
 
 CSpanningTree SpanningTreePrim(CGraph &graph)
 {
-	for (CVertex& v : graph.m_Vertices) { v.inSpamTree = false; }
 
+	for (CVertex& v : graph.m_Vertices) { v.m_inSpamTree = false; }
 	CSpanningTree tree(&graph);
 	int nVertex = graph.GetNVertices();
-	
-	priority_queue<CEdge, std::vector<CEdge>, comparator> availableEdges;
-	bool valid = true;
-	int addedVertex = 1;
+	int nEdges = graph.GetNEdges();
 
-	graph.m_Vertices.front().inSpamTree = true;
+	priority_queue<CEdge*, std::vector<CEdge*>, comparator> edgeList;
+	bool prev = true;
+	int counter = 1;
 
-	CVertex* lastVertex = &graph.m_Vertices.front();
+	graph.m_Vertices.front().m_inSpamTree = true;
+	CVertex* lastV = &graph.m_Vertices.front();
 
-	while (addedVertex < nVertex) {
-		if (valid) {
-			for (CEdge* e : lastVertex->m_Edges) {
-				if (e->m_pDestination->inSpamTree == false) availableEdges.push(*e);
+	list<CEdge> eList;
+
+	while (counter < nVertex && nEdges >= nVertex - 1) {
+		if (prev) {
+			for (CEdge* e : lastV->m_Edges) {
+				if (e->m_pDestination->m_inSpamTree == false) edgeList.push(e);
 			}
 		}
-		valid = false;
 
-		CEdge edges = availableEdges.top();
-		if (edges.m_pDestination->inSpamTree == false) {
-			valid = true;
-			tree.m_Edges.push_back(&(edges));
-			edges.m_pDestination->inSpamTree = true;
-			lastVertex = edges.m_pDestination;
-			addedVertex++;
+		prev = false;
+		
+
+		CEdge* pE = edgeList.top();
+
+		if (pE->m_pDestination->m_inSpamTree == false) {
+			prev = true;
+
+			tree.m_Edges.push_back(pE);
+			pE->m_pDestination->m_inSpamTree = true;
+			lastV = pE->m_pDestination;
+			counter++;
 		}
 
-		availableEdges.pop();
+		edgeList.pop();
+
 	}
 
-
-
+	
 
 	return tree;
 }
