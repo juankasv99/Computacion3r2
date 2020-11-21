@@ -1,0 +1,35 @@
+======ARBRES DE DECISIO - 1rPPT=======
+Definició i conceptes           P7
+Exemple 1                       P14
+Consistencia                    P17
+Navalla d'Ockham                P18
+Algorisme v1                    P20
+Algorisme v2                    P23
+Criteris de divisio             P28
+metode recursiu                 P29
+Algorisme ID3 + Entropia        P30
+Algorisme C4.5                  P37
+Criteris de divisio             P39
+Avaluacio                       P43
+Metriques Avaluacio             P48
+metodes avaluacio               P51
+rendiment baix                  P58
+pruning                         P59
+pruning pesimistic              P64
+cost complexity pruning         P65
+atributs continus               P66
+valors desconeguts              P70
+
+========ENSENBLES - 2nPPT ===========
+Decision Tree Exemple (Grafic)  P2
+Minumum Distance Class.         P7
+Bagging & Boosting              P13
+Bagging                         P15
+Boosting                        P19
+Ensembles Methods               P30
+Ensembles Homogenis             P33
+
+========RANDOM FOREST - 3rPPT========
+Random Forest                   P2
+Bagging+Vectors d'entrada rand  P3
+Algorisme Random Forest         P4
