@@ -9,6 +9,7 @@ int is_pal(int start, int end, string str) {
 		return 1;
 	if (str[start] != str[end])
 		return 0;
+	
 	return is_pal(start++, end--, str);
 }
 
