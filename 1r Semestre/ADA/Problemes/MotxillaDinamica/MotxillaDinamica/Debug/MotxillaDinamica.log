@@ -1,0 +1,40 @@
+﻿  Motxilla.cpp
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(19,25): warning C4244: '=': conversion from '_Ty' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+          and
+          [
+              _Ty=int
+          ]
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(20,23): warning C4244: '=': conversion from '_Ty' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+          and
+          [
+              _Ty=int
+          ]
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(40,89): warning C4244: 'argument': conversion from '_Ty' to 'int', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(40,41): warning C4244: 'argument': conversion from '_Ty' to 'int', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(40,18): warning C4244: '=': conversion from 'int' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\MotxillaDinamica\Motxilla.cpp(53,20): warning C4244: 'initializing': conversion from '_Ty' to 'int', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+  MotxillaDinamica.vcxproj -> C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaDinamica\Debug\MotxillaDinamica.exe
