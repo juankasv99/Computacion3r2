@@ -1,0 +1,5 @@
+﻿  Motxilla.cpp
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaMultiple\MotxillaMultiple\Motxilla.cpp(35,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaMultiple\MotxillaMultiple\Motxilla.cpp(38,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaMultiple\MotxillaMultiple\Motxilla.cpp(41,21): warning C4018: '<': signed/unsigned mismatch
+  MotxillaMultiple.vcxproj -> C:\Users\thela\Documents\UAB\3r2\1r Semestre\ADA\Problemes\MotxillaMultiple\Debug\MotxillaMultiple.exe

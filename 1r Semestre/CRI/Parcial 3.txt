@@ -1,0 +1,65 @@
+======BAYES - 1rPPT======
+Conceptes                    P4
+Probabilitat                 P5
+Variables Aleatories         P6
+Axiomes Kolmogorov           P8
+Probabilitat Condicionada    P12
+Events Independents          P18
+Bayes                        P20
+Joint                        P24
+Margin                       P25
+Ús Joint                     P27  ___
+Independencia Condicional    P36 |\*/|
+                                 |||||
+=======BAYES II - 2nPPT=======
+Formula Class. Bayesià       P5
+Formula Class. MAP           P8
+
+======NAIVE BAYES - 3rPPT=======
+Naive Bayes Class.           P8
+Exemple                      P9
+Algorisme                    P16
+Laplace Smoothing            P19
+Hipotesi independencia cond. P20
+Naive Bayes Caracteristiques P21
+Exemples                     P23
+
+======NAIVE BAYES II - 4tPPT======
+Tipus de variables            P4
+Estimació de densitat         P7
+Maximum Likelihood est.       P9
+Distr. de Bernoulli           P12
+MLE formulas                  P13
+Overfitting MLE               P14
+Distribució normal Univariada P15
+Info a priori (Bernoulli)     P16
+
+======HMM - 5ePPT======
+Processos seqüencials         P8
+Processos de Markiv           P9
+Matrius de transició d'estat  P11 
+Diagrama de transició "       P12
+Cadenes de Markov             P13
+HMM                           P17
+Estats d'HMM                  P19
+Estats discrets               P20
+Especificació                 P22
+Tasques d'inferencia          P26
+	Filtratge             P26
+	Prediccio             P26
+	Suavitzat             P26
+	Decoding              P26
+Filtratge i Suavització       P28
+Estadistica en cadenes Markov P32
+HMM discrets                  P35
+	Filtering             P35
+	Smoothing             P36
+Cálcul                        P38
+Explicació més plausible      P40
+HMM discr. - Learning         P43
+Estimador ML                  P44
+Algorisme EM                  P45
+
+
+
+
