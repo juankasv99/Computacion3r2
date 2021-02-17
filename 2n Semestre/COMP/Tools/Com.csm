@@ -1,0 +1,2632 @@
+/// #Common Author=Francisco Javier Sánchez Pujadas
+/// #Common Keywords=Compiladors
+
+/// #Record
+/// #RecType=Module
+/// #Name=CoSeL/Modules/Com
+/** #Description=
+El mòdul #b{COM} de CoSeL es un generador de compiladors. Aquest genera analitzadors
+descendents de gramàtiques LL(1).
+*/
+
+use CVServices
+
+// =============================================================================
+// AUTOMATA FINIT ==============================================================
+// =============================================================================
+
+Type [public] TransicioAutomata(
+	Simbol, // Caracter que s'ha de llegir per activar la transició.
+	Desti // estat al que anira despres de la transició
+);
+
+Type [public] EstatAutomata(
+	Id, // Identificador del estat del automata (0,1,2,3...)
+	Transicions, // llista de transicions a altres estats
+	Etiqueta // Etiqueta del estat final (NoFinal, Final, Separador, Categoria sintáctica)
+);
+
+const [public] NoFinal, Final, Separador;
+
+proc [public] out:Stream.Print(e:EstatAutomata)=>
+{
+	if (TypeP(List,e.Id)) {
+		out.Print("<Estat [");
+		out.Print(e.Id.Head);
+		for (e2<-e.Id.Tail) out.Print(", ",e2);
+		out.Print("]");
+	}
+	else out.Print("<Estat ",e.Id);
+	if (e.Etiqueta!=NoFinal) out.Print(":",e.Etiqueta);
+	out.Print(">");
+}
+
+Type [public] AutomatFinit(
+	Inicial, // Estat inicial
+	Finals, // Llista d'estats finals
+	Estats
+);
+
+// CrearAutomata ===============================================================
+// Transicions es una llista de (estat font,caracter,estat destí)
+
+Fun [public] CrearAutomata(inicial,finals,transicions)=>
+{
+	var trans=[];
+	var af=new AutomatFinit(unbound,[],[]);
+	for (f<-finals) {
+		var etiqueta=Final;
+		if (TypeP(Vector,f)) {
+			etiqueta=f[1];
+			f=f[0];
+		}
+		Search (e<-af.Estats,e.id==f) throw Exception("Estat final duplicat: ",f);
+		af.Finals=EstatAutomata(f,[],etiqueta)::af.Finals;
+		af.Estats=af.Finals.Head::af.Estats; 
+	}
+	af.Finals=reverse(af.Finals);
+	af.Inicial=Search (e<-af.Estats,e.id==inicial) e 
+		else {
+			var ne=new EstatAutomata(inicial,[],NoFinal);
+			af.Estats=ne::af.Estats; 
+			ne;
+		}
+	//af.Finals=sort(af.Finals,AFun(a,b)=>StrPrint(a)<StrPrint(b));
+	for (t<-transicions) {
+		var s=Search (e<-af.Estats,e.id==t[0]) e; 
+			else { var ne=EstatAutomata(t[0],[],NoFinal); af.Estats=ne::af.Estats; ne; } 
+		var c=t[1];
+		for (dName<- if (TypeP(List,t[2])) t[2] else [t[2]]) { 
+			var d=Search (e<-af.Estats,e.id==dName) e; else { var ne=EstatAutomata(dName,[],NoFinal); af.Estats=ne::af.Estats; ne; }
+			if (TypeP(char,c)) s.Transicions=TransicioAutomata(c,d)::s.Transicions;
+			else for (c1<-c:IndexValue) s.Transicions=TransicioAutomata(c1,d)::s.Transicions;
+		}
+	}
+	af;
+}
+
+// VeureTransicions ============================================================
+
+Proc [public] this:AutomatFinit.VeureTransicions()=>
+{
+
+	Fun SortEstats(l)=>Sort(l,AFun(a,b)=>strprint(a)<strprint(b));
+	Proc PrintDesti(d)=>{
+		if (TypeP(list,d)) {
+			cout.Print("{");
+			if (d!=[]) {
+				cout.Print(d.Head);
+				for (e<-d.tail) cout.Print(", ",e);
+			}
+			cout.PrintLn("}");
+		}
+		else cout.PrintLn(d);
+	}
+	
+	for (e<-SortEstats(this.Estats)) {
+		var l=e.Transicions;
+		// Agrupar transicions del mateix simbol
+		var l2=[];
+		while (l!=[]) {
+			var s=l.head.Simbol;
+			var r=[t,t|t<-l,t.Simbol=:=s];
+			l=r[1];
+			var ds=SortEstats([t.Desti|t<-r[0]]);
+			if (ds.Tail==[]) l2=TransicioAutomata(s,ds.Head)::l2;
+			else l2=TransicioAutomata(s,ds)::l2;
+		}
+		while (l2!=[]) {
+			// Agrupar transicions pel mateix destí
+			var d=l2.head.Desti;
+			var r=[t,t|t<-l2,t.Desti=:=d]; 
+			l2=r[1];
+			var ld=Sort(r[0],Afun(a,b)=>a.Simbol<b.Simbol);
+			var empty=[t|t<-ld,t.Simbol=='$'];
+			var noempty=[t|t<-ld,t.Simbol!='$'];
+			if (empty!=[]) {
+				cout.Print(e," -- ",fmtReadable,'$'," --> ");
+				PrintDesti(d);
+			}
+			if (noempty!=[]) {
+				cout.Print(e," -- ");
+				if (noempty.tail=:=[]) cout.Print(fmtReadable,noempty.head.Simbol);
+				else {
+					var s=OutStrStream();
+					for (t<-noempty) s.Print(t.Simbol);
+					cout.Print(fmtReadable,s.Str());
+				}
+				cout.Print(" --> ");
+				PrintDesti(d);
+			}			
+		}
+	}
+}
+
+// VeureAutomat ================================================================
+
+Proc [public] this:AutomatFinit.VeureAutomat()=>
+{
+	cout.PrintLn("Estat inicial: ", this.Inicial);
+	cout.Print("Estats Finals: {");
+	if (this.Finals!=[]) {
+		cout.Print(this.Finals.Head);
+		for (e<-this.Finals.tail) cout.Print(", ",e);
+	}
+	cout.PrintLn("}");
+	cout.PrintLn("Transicions: ");
+	this.VeureTransicions();
+}
+
+// EsDeterminista ==============================================================
+
+Fun [public] this:AutomatFinit.EsDeterminista()=>
+{
+	for (e<-this.Estats) {
+		var l=e.Transicions;
+		while (l!=[]) {
+			var t=l.head;
+			if (t.Simbol=='$') return false;
+			l=l.tail;
+			if (-](t2<-l,t2.Simbol==t.Simbol)) return false;
+		}
+	}
+	true;
+}
+
+// AutomatDeterminista ========================================================
+// En la construcció del automat determinista els identificadors dels seus
+// estats seran llistes d'estats del automat no determinista
+
+Fun [public] this:AutomatFinit.AutomataDeterminista()=>
+{
+	//Fun this:TransicioAutomata.Destins()=> if (TypeP(list,this.Desti)) this.Desti else [this.Desti];
+	var AFD=new AutomatFinit(unbound,[],[]);
+	
+	Fun AplicarTransicionsSecuenciaBuida(estat)=>
+	{
+		var conjunt=[];
+		Proc TB(e)=> {
+			if (conjunt.MemberP(e)) return;
+			conjunt=e::conjunt;
+			for (t<-e.Transicions, t.Simbol=='$') {
+				if (TypeP(List,t.Desti)) for (d<-t.Desti) TB(d);
+				else TB(t.Desti);
+			}
+		}
+		if (TypeP(List,estat)) for (d<-estat) TB(d);
+		else TB(estat);
+		Search (e<-AFD.Estats,SetEqual(conjunt,e.Id)) e
+		else {
+			conjunt=sort(conjunt,AFun(a,b)=>StrPrint(a)<StrPrint(b));
+			var ne=new EstatAutomata(conjunt,[],NoFinal);
+			AFD.Estats=ne::AFD.Estats;
+			ne
+		}
+	}
+	AFD.Inicial=AplicarTransicionsSecuenciaBuida(this.Inicial);
+	var modificat=true;
+	while (modificat) {
+		modificat=false;
+		for (ed<-afd.Estats) {
+			var SimbolsProcessats=['$'];
+			for (eNoDet<-ed.Id; tNoDet<-eNoDet.Transicions, !SimbolsProcessats.MemberP(tNoDet.Simbol)) {
+				var sim=tNoDet.Simbol;
+				SimbolsProcessats=sim::SimbolsProcessats;
+				var destins=[tNoDet.Desti];
+				for (eNoDet<-ed.Id; tNoDet<-eNoDet.Transicions, tNoDet.Simbol==sim) destins=destins | [tNoDet.Desti];
+				var estatDesti=AplicarTransicionsSecuenciaBuida(destins);
+				// Ver si existe la transición al estado destino
+				if (!-](td<-ed.Transicions, td.Simbol==sim, estatDesti==td.Desti)) {
+					modificat=true;
+					ed.Transicions=TransicioAutomata(sim,estatDesti)::ed.Transicions;
+				}
+			}
+		}
+	}
+	// Buscar els estats finals del AFD
+	for (ed<-afd.Estats) {
+		var fs=[eNoDet | eNoDet<-ed.Id, this.Finals.MemberP(eNoDet)];
+		Search (PrimerFinal<-this.Finals, fs.MemberP(PrimerFinal)) {
+			ed.Etiqueta=PrimerFinal.Etiqueta;
+			afd.Finals=ed::afd.Finals;
+		}
+	}
+	afd.Finals=sort(afd.Finals,AFun(a,b)=>StrPrint(a)<StrPrint(b));
+	// Ordenar els estats finals segons l'ordre de les etiquetas del AFND
+	afd.Finals=[eDet | eNoDet<-this.Finals; eDet<-afd.finals, eDet.Etiqueta==eNoDet.Etiqueta];
+	AFD
+}
+
+// NumerarEstats ================================================================
+
+Proc [public] this:AutomatFinit.NumerarEstats()=>
+{
+	for (e<-this.Estats,i<-0..) e.Id=i;
+}
+
+// AnomenarEstats ==============================================================
+
+Proc [public] this:AutomatFinit.AnomenarEstats()=>
+{
+	for (e<-this.Estats, TypeP(List,e.Id)) {
+		var out=OutStrStream();
+		out.Print(e.Id.Head.Id);
+		for (e2<-e.Id.Tail) out.Print("_",e2.Id);
+		e.Id=out.Str();
+	}
+}
+
+
+// Analitza ====================================================================
+
+Proc [public] this:AutomatFinit.Analitza(sequencia)=>
+{
+	var s=this.Inicial;
+	for (i<-sequencia:Index) {
+		var c=sequencia[i];
+		Search (t<-s.Transicions, t.Simbol==c) {
+			cout.PrintLn(s," -- ", fmtReadable,c," --> ",t.Desti);
+			s=t.Desti;
+		}
+		else {
+			cout.PrintLn("ERROR: De l'estat ",s," no surt transicio amb ",fmtreadable,c);
+			return;
+		}
+	}
+	if (s.Etiqueta!=NoFinal) cout.PrintLn("Sequencia acceptada");
+	else cout.PrintLn("Sequencia NO acceptada");
+}
+
+// Scanner =====================================================================
+
+Fun [public] this:AutomatFinit.Scanner(sequencia)=>
+{
+	var s=this.Inicial;
+	var finalSeparadors=-1;
+	var finalSimbol=unbound;
+	var categoriaSintactica=unbound;
+	for (i<-sequencia:Index) {
+		var c=sequencia[i];
+		Search (t<-s.Transicions, t.Simbol==c) {
+			cout.PrintLn(s," -- ", fmtReadable,c," --> ",t.Desti);
+			s=t.Desti;
+			if (s.Etiqueta==Separador) finalSeparadors=i;
+			else if (s.Etiqueta!=NoFinal) {
+				finalSimbol=i;
+				categoriaSintactica=s.Etiqueta;
+			}
+		}
+		else break;
+	}
+	if (categoriaSintactica==unbound) throw Exception("Error lexicogafic");
+	cout.PrintLn("Separadors llegits: ",fmtReadable,sequencia[..finalSeparadors+1]);
+	cout.PrintLn("Simbol llegit: ",fmtReadable,sequencia[finalSeparadors+1..finalsimbol+1]," categoria sintactica: ",categoriaSintactica);
+	sequencia[finalSimbol+1..]
+}
+
+// ScannerSequencia =====================================================================
+
+Proc [public] this:AutomatFinit.ScannerSequencia(sequencia)=>
+{
+	while (sequencia!="") {
+		cout.PrintLn("Crida al scanner amb: ",fmtReadable,sequencia);
+		sequencia=this.Scanner(sequencia);
+	}
+}
+
+
+
+// =============================================================================
+// Escàner =====================================================================
+// =============================================================================
+
+Var [public] ScanInput=cin; // Entrada utilitzada pel escàner
+/// #Purpose= Conte el stream utilitzat per l'#c{EscanerEstandard}
+/** #Description=
+La variable #c{ScanInput} conte el stream del que llegeix l'#c{EscanerEstandard}
+generat automàticament pel generador de compiladors.
+*/
+/*
+Símbols terminals especials:
+
+Identificador
+    forma: comencen per lletra i pot seguir lletra o dígit. en qualsevol posició
+           poden contenir "_"
+    Atribut: el nom del identificador
+
+Numero
+    Forma: números sencers o reals sense signe.
+           Admet sintaxis científica, hexadecimal, etc.
+    Atribut: el seu valor que pot ser int o real.
+
+String
+    Forma: caràcters entre cometes. Admet caràcters especials començant per \
+    Atributs: el string
+Caracter
+    Forma: un caràcter entre cometes simples.
+    Atributs: el caràcter
+
+EOF: Indicador de final de fitxer
+*/
+
+// EscanerEstandard ============================================================
+
+Fun [public] EscanerEstandard(STerms)=>
+{
+    for () {
+        Var s=Scanner(ScanInput);
+        switch (s) {
+            Symbol => {
+                if (STerms.MemberP(s)) return s;
+                else if (s.name[0]>='A' && s.name[0]<='Z' || s.name[0]>='a' && s.name[0]<='z')
+                    return `Identificador,s.Name;
+                else return Throw SyntaxError("Error lexicogràfic amb el símbol: ",s);
+            }
+            int | real => return `Numero,s;
+            EOF => return EOF;
+            NewLine => {}
+            String => return `String,s;
+            Char => return `Caracter,s;
+            Others => Throw SyntaxError("Error lexicogràfic amb el símbol: ",s);
+        }
+    }
+    return Unbound; // Nunca se ejecuta
+}
+/// #Purpose= Funció que fa d’escàner a partir de una llista de terminals
+/** #Description=
+La funció #c{EscanerEstandard} s’utilitza con base per generar el escàner de les
+gramatiques. Com entrada te la lista de símbols terminals que ha d’acceptar i llegeix
+del stream contingut a la variable #c{ScanInput}.
+
+El parámetre #c{STerms} conte la llista dels símbols terminals que accepta l’escàner.
+A demés d’aquets símbols l’escàner accepta els següents:
+#List
+#Item #b{Identificador}.
+    #List
+    #item forma: comencen per lletra i pot seguir lletra o dígit. en qualsevol posició
+           poden contenir "_"
+    #item Atribut: el nom del identificador
+    #/List
+
+#Item #b{Numero}.
+    #List
+    #item Forma: números sencers o reals sense signe.
+           Admet sintaxis científica, hexadecimal, etc.
+    #item Atribut: el seu valor que pot ser int o real.
+    #/List
+
+#Item #b{String}.
+    #List
+    #item Forma: caràcters entre cometes. Admet caràcters especials començant per \
+    #item Atributs: el string
+    #/List
+#Item #b{Caracter}.
+    #List
+    #item Forma: un caràcter entre cometes simples.
+    #item Atributs: el caràcter
+    #/List
+
+#Item #b{EOF}. Indicador de final de fitxer
+#/List
+
+L’escàner considera comentaris multilínea de la forma #c{/}#c{* ... *}#c{/} i
+de una línea de la forma #c{// ...}
+
+L’escàner funciona amb retorn de múltiples valors. El primer valor es la categoria
+sintàctica (un dels elements de la llista #c{STerms} o identificador, numero, string, caracter o EOF).
+L’altre valor es l’atribut del símbol en cas de que en tingui.
+
+En cas de error genera l’excepció #c{SyntaxError}
+*/
+
+// CrearEscanerEstandard =======================================================
+// Crea una funció que es l’escàner amb una sèrie de terminals
+
+Fun [public] CrearEscanerEstandard(STerms:List)=>  AFun()=>EscanerEstandard(STerms);
+/// #Purpose= Crear un escàner estàndard a partir d’una llista de símbols terminals
+/** #Description=
+La funció #c{CrearEscanerEstandard} retorna la funció que farà d’escàner dels
+símbols indicats a la llista #c{STerms}. Aquesta funció l’utilitza el generador de
+compiladors per genera l’escàner del compilador.
+*/
+
+// =============================================================================
+// GramaticaBNF ================================================================
+// =============================================================================
+
+// RegleBNF ====================================================================
+
+Type [public,Print=Contents] RegleBNF(
+    Simbol, // Símbol no terminal a l’esquerra de ::=
+    Expressio // expressió BNF a la dreta de ::=
+)
+/// #Purpose= Representació interna d’una regla BNF
+
+
+// NoTerminal =================================================================
+
+Type [public,Print=Contents] NoTerminal(
+    Exp // Símbol no terminal o expressió que representa la seva declaració o crida
+)
+/// #Purpose= Representació interna d’un símbol no terminal de la gramàtica BNF
+
+// Terminal ====================================================================
+
+Type [public,Print=Contents] Terminal(
+    Cat, // Categoria sintàctica del símbol terminal
+    Params // Atributs que es volen obtenir del escàner
+)
+/// #Purpose= Representació interna d’un símbol no terminal en la gramàtica BNF
+
+// SimbolAccio ================================================================
+
+Type [public] SimbolAccio(
+    Codi // Codi CoSeL que s’executarà quan l’anàlisi sintàctica passi pel símbol
+         // d’acció
+);
+/// #Purpose= Representació interna d’un símbol d’acció en la gramàtica BNF
+
+
+// GramaticaBNF ================================================================
+
+Type [public] GramaticaBNF(
+    Inicial,        // Símbol inicial de la gramàtica
+    Terminals,      // Símbols terminals de la gramàtica
+    NoTerminals,    // Símbols no terminals
+    Regles,         // Regles BNF de la gramàtica
+    Produccions,    // Llista de produccions
+    MaxNoTer,       // índex màxim d’un no terminal de les produccions
+    Diccionari,     // Relació entre els símbols terminals de les regles BNF i les produccions
+    Anullables,     // Conjunto de símbols anul•lables
+    Primers,        // Conjunts dels primers dels no terminals
+    Seguents        // Conjunts dels següents dels no terminals
+    )
+/// #Purpose= Classe que representa una gramàtica BNF
+/** #Description=
+#c{GRamaticaBNF} es una estructura que representa una gramàtica en BNF i la
+seva conversió a produccions. Els camps que conte son els següents:
+#Program
+    Inicial,        // Símbol inicial de la gramàtica
+    Terminals,      // Símbols terminals de la gramàtica
+    NoTerminals,    // Símbols no terminals
+    Regles,         // Regles BNF de la gramàtica
+    Produccions,    // Llista de produccions
+    MaxNoTer,       // índex màxim d’un no terminal de les produccions
+    Diccionari,     // Relació entre els símbols terminals de les regles BNF i les produccions
+    Anullables,     // Conjunto de símbols anul•lables
+    Primers,        // Conjunts dels primers dels no terminals
+    Seguents        // Conjunts dels següents dels no terminals
+#/Program
+
+La creació de la gramàtica es realitza amb la següent sintaxis:
+
+#Program
+BNF_GRAMMAR #i{símbol inicial}
+TERMINALS #i{símbols terminals separats per espais o entre dobles cometes}
+BNF
+    Rule #i{Regla BNF}
+    Rule #i{Regla BNF}
+    #i{...}
+END
+#/Program
+
+Per exemple
+
+#Program
+Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio> ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+#/Program
+*/
+
+void intern("::=")
+
+// CrearGramaticaBNF ===========================================================
+
+Fun CrearGramaticaBNF(Start, terms, rules)=>
+{
+    Fun RulesToPairList(ruls)=>
+    {
+        Fun pr(ap)=> {
+            if (TypeP(Apply,ap) && ap.Function==`\::=) {
+                pr(ap.arg(0))++[ap.arg(i)| i<-1..ap.Nargs-1]
+            }
+            else [ap]
+        }
+        Var lt=pr(ruls);
+        [(l,r)|l<-lt,r<-lt.tail,i<-0..,(i&1)==0]
+    }
+    Fun CommaToList(c)=>
+    {
+        if (ApplyFunP(c,`\,,2)) c.Arg(0)::CommaToList(c.Arg(1));
+        else [c];
+    }
+    // Pasar a símbolos todos los terminos
+
+    terms=[
+        switch (x) {
+            symbol => x;
+            string => intern(x);
+            Others => throw SemanticError(x," no es un terminal vàlid");
+        }
+    |x<-CommaToList(terms)];
+
+    Var NoTerms=[];
+    Proc DecNoTerm(ruls)=>
+    {
+        for (r<-ruls) {
+            var nt=r[0];
+            if (!ApplyFunP(nt,`Nonterminal,1)) {
+                Throw SemanticError(
+                        "Falta no terminal en regla BNF antes de ::=",nt);
+            }
+            nt=nt.Arg(0);
+            if (TypeP(Apply,nt)) nt=nt.Function;
+            if (!TypeP(Symbol,nt)) {
+                Throw SemanticError(nt,"No es un nom de no terminal vàlid");
+            }
+            if (NoTerms.MemberP(nt)) {
+                Throw SemanticError("Declaració duplicada del no terminal: ",
+                nt);
+            }
+            NoTerms=nt::NoTerms;
+        }
+    }
+
+    Fun NoTerNorm(n)=>
+    {
+        n=n.Arg(0);
+        if (TypeP(Symbol,n)) n=Apply(n);
+        if (!TypeP(Apply,n)) {
+            Throw SemanticError(n,"No es un nom de no terminal vàlid");
+        }
+        if (!NoTerms.MemberP(n.Function)) {
+            throw SemanticError("<",n.Function,
+                "> es un no terminal no declarat");
+        }
+        NoTerminal(n);
+    }
+
+    Fun TermCat(c)=>
+    {
+        c=switch (c) {
+            symbol => c;
+            string => intern(c);
+            Others => throw SemanticError(c," no es un terminal vàlid");
+        }
+        if (!terms.MemberP(c)) {
+            throw SemanticError(c," es un terminal no declarat");
+        }
+        c
+    }
+    Fun TerNorm(cat,args)=>
+    {
+        Terminal(TermCat(cat),CommaToList(args))
+    }
+    Fun TerNorm(cat)=>
+    {
+        Terminal(TermCat(cat),[]);
+    }
+    Fun BNFExpNorm(exp)=>
+    {
+        if (ApplyFunP(exp,`Concat,2))
+            Apply(`Concat,BNFExpNorm(exp.Arg(0)),BNFExpNorm(exp.Arg(1)));
+        else if (ApplyFunP(exp,`\|,2))
+            Apply(`\|,BNFExpNorm(exp.Arg(0)),BNFExpNorm(exp.Arg(1)));
+        else if (ApplyFunP(exp,`Optional,1))
+            Apply(`Optional,BNFExpNorm(exp.Arg(0)));
+        else if (ApplyFunP(exp,`Repeat,1))
+            Apply(`Repeat,BNFExpNorm(exp.Arg(0)));
+        else if (ApplyFunP(exp,`SimbolAccio,1)) SimbolAccio(exp.Arg(0));
+        else if (ApplyFunP(exp,`NonTerminal,1)) NoTerNorm(exp);
+        else if (ApplyFunP(exp,`Terminal,2)) TerNorm(exp.Arg(0),exp.Arg(1));
+        else if (ApplyFunP(exp,`Terminal,1)) TerNorm(exp.Arg(0));
+        else if (TypeP(string,exp)) TerNorm(exp);
+        else if (TypeP(symbol,exp)) {
+            if (exp==`\$) `\$
+            else TerNorm(exp);
+        }
+        else Throw SemanticError("No es una expressió BNF ",exp);
+    }
+    Fun RuleNorm(r)=>
+    {
+        Var nt=r[0];
+        Var exp=r[1];
+        if (!ApplyFunP(nt,`NonTerminal,1)) {
+            Throw SemanticError(
+                "Falta no terminal a la esquerra de ::= en regla bnf ",r);
+        }
+        nt=NoTerNorm(nt);
+        exp=BNFExpNorm(exp);
+        RegleBNF(nt,exp);
+    }
+    var pairlist=RulesToPairList(rules);
+    DecNoTerm(pairlist);
+    // Normalitzar el símbol inicial com una crida
+    // Verificar que el símbol inicial pertanyi als no terminals
+    if (ApplyFunP(Start,`NonTerminal,1)) {
+        Throw SemanticError(Start, " no es un no terminal");
+    }
+    Start=NoTerNorm(Start);
+    if (!NoTerms.MemberP(Start.Exp.Function)) {
+        Throw SemanticError("El símbolo inicial ",Start.Exp.Function, " no forma part del conjunt de no terminals de la gramàtica");
+    }
+
+    Var Ruls=[RuleNorm(r)|r<-pairlist];
+    GramaticaBNF(Start,terms,NoTerms,Ruls,
+    Unbound,Unbound,Unbound,Unbound,Unbound,Unbound)
+}
+
+ // MacroGramaticaBNF ============================================================
+
+Macro [public] MacroGramaticaBNF(Start, terms, rules)=>
+    CrearGramaticaBNF(Start, terms, rules)
+///#Prototype=BNF_GRAMMAR #i{inicial} TERMINALS #i{terminals} BNF #i{Regles BNF} END}
+///#Purpose= Crear una #c{GramaticaBNF}
+/**#Description=
+La macro te associada la següent sintaxis per crea una gramàtica BNF:
+#Program
+BNF_GRAMMAR #i{símbol inicial}
+TERMINALS #i{símbols terminals separats per espais o entre dobles cometes}
+BNF
+    Rule #i{Regla BNF}
+    Rule #i{Regla BNF}
+    #i{...}
+END
+#/Program
+
+Per exemple
+
+#Program
+Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio> ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+#/Program
+*/
+
+
+// Gramàtica BNF ===============================================================
+
+Var GBNF=NewGrammar("GBNF",Scanner,True)
+
+GBNF.SyntaxRule("100 ::= 1000",2000,"::=",false)
+GBNF.SyntaxRule("y Rule 100 ::= 1000",2000,"::=",false)
+GBNF.SyntaxRule("x y",900,`Concat,True)
+GBNF.SyntaxRule("( z )",500,Identity,True)
+GBNF.SyntaxRule("[ z ]",500,`Optional,True)
+GBNF.SyntaxRule("{ z }",500,`Repeat,True)
+GBNF.SyntaxRule("x | y",1000,`\|,True)
+GBNF.SyntaxRule("< CoSeL >",100,`NonTerminal,True)
+GBNF.SyntaxRule("0 # ( CoSeL )",100,`Terminal,True)
+GBNF.SyntaxRule("0 # ( )",100,`Terminal,True)
+GBNF.SyntaxRule("@ CoSeL ;",500,`SimbolAccio,True)
+GBNF.SyntaxRule("@ { CoSeL }",500,`SimbolAccio,True)
+
+Var GTERMS=NewGrammar("GTERMS",Scanner,True)
+GTERMS.SyntaxRule("x y",900,`\,,True)
+
+ActGrammar.SyntaxRule("BNF_GRAMMAR CoSeL \\TERMINALS GTERMS \\BNF Rule GBNF END",
+    1000,`MacroGramaticaBNF)
+ActGrammar.SyntaxRule(
+    "BNF_PARSER CoSeL \\TERMINALS GTERMS \\BNF Rule GBNF END",
+    1000,`MacroParser)
+
+ActGrammar.SyntaxRule(
+    "BNF_PARSER CoSeL \\SCANNER CoSeL \\TERMINALS GTERMS \\BNF Rule GBNF END",
+    1000,`MacroParserScanner)
+
+// PSym ========================================================================
+
+Fun pg:GramaticaBNF.psym(s)=>
+{
+    switch (s) {
+        int => strPrint("<",Found (nt<-pg.Diccionari,nt[0]==s) nt[1],">");
+        [] => "$";
+        others => strprint(s);
+    }
+}
+
+// PProduc =====================================================================
+
+Fun pg:GramaticaBNF.PProduc(p)=>
+{
+    Var str=OutStrStream();
+    str.Print(pg.psym(p[0])," --> ");
+    if (p[1]==[]) str.Print("$");
+    else {
+        for (s<-p[1]) str.Print(pg.psym(s)," ");
+    }
+    str.Str();
+}
+
+// =============================================================================
+// Gramatica BNF a Produccions ================================================
+// =============================================================================
+
+// Produccions:
+// (no terminal,[terminals | no terminals])
+// terminal: symbol
+// no terminal: int
+
+Proc [public] g:GramaticaBNF.BNFAProduccions()=>
+{
+    Var pl=[];
+    Var NTCnt=0;
+    Var NTDic=[];
+    Var NTRule;
+    Fun NewNT()=>
+    {
+        var name;
+        for (n<-1..) {
+            name=StrPrint(NTRule,"_",n);
+            if (!-](x<-NTDic,name==x[1])) break;
+        }
+        NTCnt=NTCnt+1;
+        NTDic=(NTCnt,name)::NTDic;
+        NTCnt
+    }
+    Fun BNFExpASec(exp)=>
+    {
+        if (ApplyFunP(exp,`Concat,2)) {
+            BNFExpASec(exp.Arg(0))++BNFExpASec(exp.Arg(1))
+        }
+        else if (exp=:=[]) []
+        else if (TypeP(Terminal,exp)) [exp.Cat]
+        else if (TypeP(NoTerminal,exp)) {
+            Search (n<-NTDic,n[1]=:=exp.Exp.Function) [n[0]]
+            else {
+                NTCnt=NTCnt+1;
+                NTDic=(NTCnt,exp.Exp.Function)::NTDic;
+                [NTCnt]
+            }
+        }
+        else if (ApplyFunP(exp,`Optional,1)) {
+            var nt=NewNT();
+            pl=(nt,[])::pl;
+            Var s=BNFExpASec(exp.Arg(0));
+            pl=(nt,s)::pl;
+            [nt]
+        }
+        else if (ApplyFunP(exp,`Repeat,1)) {
+            var nt=NewNT();
+            pl=(nt,[])::pl;
+            Var s=BNFExpASec(exp.Arg(0))++[nt];
+            pl=(nt,s)::pl;
+            [nt]
+        }
+        else if (ApplyFunP(exp,`\|,2)) {
+            Fun OpToL(op)=>
+            {
+                if (ApplyFunP(op,`\|,2)) op.Arg(0)::OpToL(op.Arg(1))
+                else [op]
+            }
+            var nt=NewNT();
+            for (rama<-OpToL(exp)) pl=(nt,BNFExpASec(rama))::pl;
+            [nt]
+        }
+        else if (TypeP(SimbolAccio,exp)) [];
+        else if (exp==`\$) [];
+        else Throw Exception("No se convertir ", exp);
+    }
+    // Declarar el símbolo inicial
+    NTDic=[(NTCnt,g.Inicial.Exp.Function)];
+    for (r<-g.Regles) {
+        NTRule=r.Simbol.exp.Function.name;
+        Var nt=Search (n<-NTDic,n[1]=:=r.Simbol.exp.Function) n[0]
+            else {
+                NTCnt=NTCnt+1;
+                NTDic=(NTCnt,r.Simbol.exp.Function)::NTDic;
+                NTCnt
+            }
+        var pro=(nt,BNFExpASec(r.Expressio));
+        pl=pro::pl;
+    }
+    g.MaxNoTer=NTCnt;
+    g.Diccionari=NTDic;
+    g.Produccions=Sort(pl,AFun(p1,p2)=>g.psym(p1[0])<g.psym(p2[0]));
+}
+///#Purpose=Convertir una gramàtica BNF a produccions
+/**#Description=
+Donada una #c{GramaticaBNF} la transforma a produccions. Les produccions es
+guardan dintre del propi objecte de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> * #/Program
+OK
+*/
+
+// =============================================================================
+// CALCUL DE PRIMERS I SEGÜENTS ============================================
+// =============================================================================
+
+// CalcularAnullables ==============================================================
+
+Proc [public] pg:GramaticaBNF.CalcularAnullables()=>
+{
+    if (pg.Produccions==Unbound) {
+        Throw Exception("Falta calcular les produccions de la gramàtica ",pg);
+    }
+    Var anu=[];
+    for (r<-pg.Produccions,r[1]=:=[]) anu=anu | [r[0]];
+    Var len;
+    do {
+        len=anu.length;
+        for (r<-pg.Produccions, ForAll (s<-r[1]) MemberP(s,anu)) {
+            anu=anu | [r[0]];
+        }
+    } while (len!:=anu.length);
+    pg.Anullables=anu;
+}
+///#Purpose=Calcular el conjunt de símbols anul•lables d’una gramàtica
+/**#Description=
+Donada una #c{GramaticaBNF} transformada a produccions, calcula els símbols anul•lables de la
+gramàtica en produccions. Aquets es guarden dintre del propi objecte de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.VeureAnullables
+Símbolos anulables: <terme_1> <Expressio_1>
+OK
+#/Program
+*/
+
+// CalcularPrimers =================================================================
+
+Proc [public] pg:GramaticaBNF.CalcularPrimers()=>
+{
+    if (pg.Anullables==Unbound) {
+        Throw Exception("Falta calcular els anul•lables de la gramàtica ",pg);
+    }
+    Var anu=pg.Anullables;
+    Var Primeros=new vector[pg.MaxNoTer+1];
+    for (i<-Primeros:Index) Primeros[i]=if (MemberP(i,anu)) [[]] else [];
+    Var PrimerosLen=new vector[pg.MaxNoTer+1];
+    for (i<-Primeros:Index) PrimerosLen[i]=0;
+    Var modificados=true;
+
+    Fun PrimerosDe(l)=>
+    {
+        if (l=:=[]) [[]]
+        else {
+            switch (l.Head) {
+                symbol => [l.Head];
+                int =>
+                    if (MemberP([],Primeros[l.Head]))
+                        Primeros[l.Head]-[[]] | PrimerosDe(l.Tail);
+                    else Primeros[l.Head]
+            }
+        }
+    }
+
+    while (modificados) {
+        for (p<-pg.Produccions) {
+            Primeros[p[0]]= Primeros[p[0]] | PrimerosDe(p[1]);
+        }
+        modificados=false;
+        for (i<-Primeros:Index) {
+            Var len=Primeros[i].Length;
+            modificados=modificados || len!:=PrimerosLen[i];
+            PrimerosLen[i]=len;
+        }
+    }
+    pg.Primers=Primeros;
+}
+///#Purpose=Calcular el conjunt de primers dels símbols no terminals de les produccions
+/**#Description=
+Donada una #c{GramaticaBNF} transformada a produccions, calcula els conjunts de primers
+dels símbols no terminals de la gramàtica en produccions.
+Aquets es guarden dintre del propi objecte de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.veureprimers
+Conjunts de primers dels símbols no terminals:
+Primers(<Expressio>)= Identificador Numero ( -
+Primers(<Expressio_1>)= - + $
+Primers(<terme>)= - ( Numero Identificador
+Primers(<Expressio_2>)= + -
+Primers(<terme_1>)= / * $
+Primers(<factor>)= Identificador Numero ( -
+Primers(<terme_2>)= * /
+Primers(<factor_1>)= - ( Numero Identificador
+Ok
+#/Program
+*/
+
+// CalcularSeguents ================================================================
+
+Proc [public] pg:GramaticaBNF.CalcularSeguents()=>
+{
+    if (pg.Primers==Unbound) {
+        Throw Exception("Falta calcular els primers de la gramàtica ",pg);
+    }
+
+    Var Primeros=pg.Primers;
+    Var Siguientes=new Vector[pg.MaxNoTer+1];
+    for (i<-Siguientes:Index) Siguientes[i]=[];
+    Siguientes[0]=[EOF];
+    Var SiguientesLen=new vector[pg.MaxNoTer+1];
+    for (i<-Siguientes:Index) SiguientesLen[i]=0;
+    SiguientesLen[0]=1;
+    Var modificados=true;
+
+    while (modificados) {
+        for (p<-pg.Produccions) {
+            Var l=p[1];
+
+            Fun PrimerosDe(l)=>
+            {
+                if (l=:=[]) Siguientes[p[0]];
+                else {
+                    switch (l.Head) {
+                        symbol => [l.Head];
+                        int =>
+                            if (MemberP([],Primeros[l.Head]))
+                                Primeros[l.Head]-[[]] | PrimerosDe(l.Tail);
+                            else Primeros[l.Head]
+                    }
+                }
+            }
+
+            while (l!:=[]) {
+                if (TypeP(int,l.Head)) {
+                    Siguientes[l.Head]=Siguientes[l.Head] | PrimerosDe(l.Tail);
+                }
+                l=l.Tail;
+            }
+        }
+        modificados=false;
+        for (i<-Siguientes:Index) {
+            Var len=Siguientes[i].Length;
+            modificados=modificados || len!:=SiguientesLen[i];
+            SiguientesLen[i]=len;
+        }
+    }
+    pg.Seguents=Siguientes;
+}
+///#Purpose=Calcular el conjunt de següents dels símbols no terminals de les produccions
+/**#Description=
+Donada una #c{GramaticaBNF} transformada a produccions, calcula els conjunts de següents
+dels símbols no terminals de la gramàtica en produccions.
+Aquets es guarden dintre del propi objecte de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+OK
+CoSeL> gramatica.veureseguents
+Conjunts de seguents dels símbols no terminals:
+Seguents(<Expressio>)= ) <SCHAR:EOF>
+Seguents(<Expressio_1>)= ) <SCHAR:EOF>
+Seguents(<terme>)= ) + - <SCHAR:EOF>
+Seguents(<Expressio_2>)= Identificador Numero ( -
+Seguents(<terme_1>)= ) <SCHAR:EOF> - +
+Seguents(<factor>)= ) * / + - <SCHAR:EOF>
+Seguents(<terme_2>)= - ( Numero Identificador
+Seguents(<factor_1>)= ) <SCHAR:EOF> - + / *
+Ok
+#/Program
+*/
+
+// VeureTerminals ==============================================================
+
+Proc [public] g:GramaticaBNF.VeureTerminals()=>
+{
+    cout.Print("Símbols Terminals: ");
+    for (t<-g.Terminals) cout.Print(t," ");
+    cout.PrintLn();
+}
+///#Purpose=Visualitza els símbols terminals de la gramàtica
+/**#Description=
+Visualitza els símbols terminals de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.veureterminals
+Símbols Terminals: + - * / Identificador Numero ( )
+Ok
+#/Program
+*/
+
+// VeureInicial =============================================================
+
+Proc [public] g:GramaticaBNF.VeureInicial()=>
+{
+	var nom=g.inicial.exp.function.name;
+	if (nom.length>7 && nom[0..7]=="PARSER_") nom=nom[7..];
+    cout.PrintLn("Símbol inicial: ","<",nom,"> ");
+}
+///#Purpose=Visualitza els símbol inicial de la gramàtica
+/**#Description=
+Visualitza el simbol inicial de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.veureinicial
+Símbol inicial: <Expressio>
+Ok
+#/Program
+*/
+
+// VeureNoTerminals =============================================================
+
+Proc [public] g:GramaticaBNF.VeureNoTerminals()=>
+{
+    cout.Print("Símbols NO Terminals: ");
+    for (nt<-g.NoTerminals) cout.Print("<",nt,"> ");
+    cout.PrintLn();
+}
+///#Purpose=Visualitza els símbols no terminals de la gramàtica
+/**#Description=
+Visualitza els símbols no terminals de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.veurenoterminals
+Símbols NO Terminals: <factor> <terme> <Expressio>
+Ok
+#/Program
+*/
+
+// VeureNoTerminalsProduccions =================================================
+
+Proc [public] g:GramaticaBNF.VeureNoTerminalsProduccions()=>
+{
+    if (g.Produccions==Unbound) {
+        Throw Exception("Falta calcular les produccions de la gramàtica ",g);
+    }
+    cout.Print("Símbols NO terminals de les produccions: ");
+    for (s<-0 .. g.MaxNoTer) cout.Print(g.psym(s)," ");
+    cout.PrintLn();
+}
+///#Purpose=Visualitza els símbols no terminals de la gramàtica transformada a produccions
+/**#Description=
+Visualitza els símbols no terminals de la gramàtica transformada a produccions. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.veurenoterminalsproduccions
+Símbols NO terminals de les produccions: <Expressio> <Expressio_1> <terme> <Expressio_2> <terme_1> <factor> <terme_2> <factor_1>
+Ok
+#/Program
+*/
+
+// VeureProduccions ============================================================
+
+Proc [public] g:GramaticaBNF.VeureProduccions()=>
+{
+    if (g.Produccions==Unbound) {
+        Throw Exception("Falta calcular les produccions de la gramàtica ",g);
+    }
+    cout.PrintLn("Produccions: ");
+    for (p<-g.Produccions) cout.PrintLn(g.PProduc(p));
+}
+///#Purpose=Visualitza les produccions de la gramàtica
+/**#Description=
+Visualitza les producccions de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+#/Program
+*/
+
+// VeureAnullables ============================================================
+
+Proc [public] g:GramaticaBNF.VeureAnullables()=>
+{
+    if (g.Anullables==Unbound) {
+        Throw Exception("Falta calcular els anul•lables de la gramàtica ",g);
+    }
+    cout.Print("Símbolos anulables: ");
+    for (s<-g.Anullables) cout.Print(g.psym(s)," ");
+    cout.PrintLn();
+}
+///#Purpose=Visualitza el conjunt de símbols anul•lables de la gramàtica
+/**#Description=
+Visualitza el conjunt de símbols anul•lables de la gramàtica. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.VeureAnullables
+Símbolos anulables: <terme_1> <Expressio_1>
+OK
+#/Program
+*/
+
+// VeurePrimers ================================================================
+
+Proc [public] g:GramaticaBNF.VeurePrimers()=>
+{
+    if (g.Primers==Unbound) {
+        Throw Exception("Falta calcular els primers de la gramàtica ",g);
+    }
+    cout.PrintLn("Conjunts de primers dels símbols no terminals: ");
+    for (i<-0..g.MaxNoTer) {
+        cout.Print("Primers(",g.psym(i),")= ");
+        for (s<-g.Primers[i]) cout.Print(g.psym(s)," ");
+        cout.PrintLn();
+    }
+}
+///#Purpose=Visualitza el conjunt de primers dels símbols no terminals de les produccions
+/**#Description=
+Visualitza el conjunt de primers dels símbols no terminals de les produccions. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.veureprimers
+Conjunts de primers dels símbols no terminals:
+Primers(<Expressio>)= Identificador Numero ( -
+Primers(<Expressio_1>)= - + $
+Primers(<terme>)= - ( Numero Identificador
+Primers(<Expressio_2>)= + -
+Primers(<terme_1>)= / * $
+Primers(<factor>)= Identificador Numero ( -
+Primers(<terme_2>)= * /
+Primers(<factor_1>)= - ( Numero Identificador
+Ok
+#/Program
+*/
+
+// VeureSeguents ===============================================================
+
+Proc [public] g:GramaticaBNF.VeureSeguents()=>
+{
+    if (g.Seguents==Unbound) {
+        Throw Exception("Falta calcular els següents de la gramàtica ",g);
+    }
+    cout.PrintLn("Conjunts de següents dels símbols no terminals: ");
+    for (i<-0..g.MaxNoTer) {
+        cout.Print("Seguents(",g.psym(i),")= ");
+        for (s<-g.Seguents[i]) cout.Print(g.psym(s)," ");
+        cout.PrintLn();
+    }
+}
+///#Purpose=Visualitza els conjunts de següents dels símbols no terminals de les produccions
+/**#Description=
+Visualitza els conjunts de següents dels símbols no terminals de les produccions. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+OK
+CoSeL> gramatica.veureseguents
+Conjunts de següents dels símbols no terminals:
+Seguents(<Expressio>)= ) <SCHAR:EOF>
+Seguents(<Expressio_1>)= ) <SCHAR:EOF>
+Seguents(<terme>)= ) + - <SCHAR:EOF>
+Seguents(<Expressio_2>)= Identificador Numero ( -
+Seguents(<terme_1>)= ) <SCHAR:EOF> - +
+Seguents(<factor>)= ) * / + - <SCHAR:EOF>
+Seguents(<terme_2>)= - ( Numero Identificador
+Seguents(<factor_1>)= ) <SCHAR:EOF> - + / *
+Ok
+#/Program
+*/
+
+// VeurePrimersProduccions =====================================================
+
+Proc [public] g:GramaticaBNF.VeurePrimersProduccions()=>
+{
+    if (g.Seguents==Unbound) {
+        Throw Exception("Falta calcular els següents de la gramàtica ",g);
+    }
+    cout.PrintLn("Conjunts de Primers de les produccions: ");
+    for (p<-g.Produccions) {
+        cout.Print("Primers(",g.PProduc(p),")= ");
+        Fun PrimerosDe(l)=>
+        {
+            if (l=:=[]) g.Seguents[p[0]];
+            else {
+                switch (l.Head) {
+                    symbol => [l.Head];
+                    int =>
+                        if (MemberP([],g.Primers[l.Head]))
+                            g.Primers[l.Head]-[[]] | PrimerosDe(l.Tail);
+                        else g.Primers[l.Head]
+                }
+            }
+        }
+        Var pp=PrimerosDe(p[1]);
+        for (s<-pp) cout.Print(g.psym(s)," ");
+        cout.PrintLn();
+    }
+}
+///#Purpose=Visualitza el conjunt de primers de les produccions
+/**#Description=
+Visualitza el conjunt de primers de les produccions. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.VeureProduccions
+Produccions:
+<Expressio> --> <terme> <Expressio_1>
+<Expressio_1> --> <Expressio_2> <terme> <Expressio_1>
+<Expressio_1> --> $
+<Expressio_2> --> -
+<Expressio_2> --> +
+<factor> --> <factor_1>
+<factor_1> --> Identificador
+<factor_1> --> Numero
+<factor_1> --> ( <Expressio> )
+<factor_1> --> - <factor>
+<terme> --> <factor> <terme_1>
+<terme_1> --> <terme_2> <factor> <terme_1>
+<terme_1> --> $
+<terme_2> --> /
+<terme_2> --> *
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+OK
+CoSeL> gramatica.veureprimersproduccions
+Conjunts de Primers de les produccions:
+Primers(<Expressio> --> <terme> <Expressio_1> )= - ( Numero Identificador
+Primers(<Expressio_1> --> <Expressio_2> <terme> <Expressio_1> )= + -
+Primers(<Expressio_1> --> $)= ) <SCHAR:EOF>
+Primers(<Expressio_2> --> - )= -
+Primers(<Expressio_2> --> + )= +
+Primers(<factor> --> <factor_1> )= - ( Numero Identificador
+Primers(<factor_1> --> Identificador )= Identificador
+Primers(<factor_1> --> Numero )= Numero
+Primers(<factor_1> --> ( <Expressio> ) )= (
+Primers(<factor_1> --> - <factor> )= -
+Primers(<terme> --> <factor> <terme_1> )= Identificador Numero ( -
+Primers(<terme_1> --> <terme_2> <factor> <terme_1> )= * /
+Primers(<terme_1> --> $)= ) <SCHAR:EOF> - +
+Primers(<terme_2> --> / )= /
+Primers(<terme_2> --> * )= *
+Ok
+#/Program
+*/
+
+// EsLL1P ======================================================================
+
+Fun [public] pg:GramaticaBNF.EsLL1P()=>
+{
+    if (pg.Seguents==Unbound) {
+        Throw Exception("Falta calcular els següents de la gramàtica ",pg);
+    }
+    for (n<-0..pg.MaxNoTer) {
+        Var Producs=[p|p<-pg.Produccions,p[0]==n];
+        Var s=[];
+        for (p<-Producs) {
+            Fun PrimerosDe(l)=>
+            {
+                if (l=:=[]) pg.Seguents[p[0]];
+                else {
+                    switch (l.Head) {
+                        symbol => [l.Head];
+                        int =>
+                            if (MemberP([],pg.Primers[l.Head]))
+                                pg.Primers[l.Head]-[[]] | PrimerosDe(l.Tail);
+                            else pg.Primers[l.Head]
+                    }
+                }
+            }
+            Var pp=PrimerosDe(p[1]);
+            if ((pp & s)!=[]) return false;
+            s=s | pp;
+        }
+    }
+    true;
+}
+///#Purpose=Aquest predicat ens diu si una gramàtica es LL(1) o no
+/**#Description=
+Aquest predicat ens diu si una gramàtica es LL(1) o no. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+OK
+CoSeL> gramatica.EsLL1P
+True
+#/Program
+*/
+
+// VeureCollisionsLL1 ==========================================================
+
+Proc [public] pg:GramaticaBNF.VeureCollisionsLL1()=>
+{
+    if (pg.EsLL1P()) {
+        cout.PrintLn("No hi ha Col•lisions LL(1)");
+        return;
+    }
+    for (n<-0..pg.MaxNoTer) {
+        Var Producs=[p|p<-pg.Produccions,p[0]==n];
+        Fun PrimerosDe(l,sig)=>
+        {
+            if (l=:=[]) sig;
+            else {
+                switch (l.Head) {
+                    symbol => [l.Head];
+                    int =>
+                        if (MemberP([],pg.Primers[l.Head]))
+                            pg.Primers[l.Head]-[[]] | PrimerosDe(l.Tail,sig);
+                        else pg.Primers[l.Head]
+                }
+            }
+        }
+        Var ps=[(p,PrimerosDe(p[1],pg.Seguents[p[0]])) | p<-Producs];
+        while (ps!=[]) {
+            Var p0=ps.Head;
+            for (p1<-ps.Tail, (p1[1] & p0[1])!=[]) {
+                cout.Print("Produccions amb intersecció: ");
+                for (s<-(p1[1] & p0[1])) cout.Print(pg.psym(s)," ");
+                cout.println();
+                cout.PrintLn("    ",pg.PProduc(p0[0]));
+                cout.PrintLn("    ",pg.PProduc(p1[0]));
+            }
+            ps=ps.Tail;
+        }
+    }
+}
+///#Purpose=Visualitza les col•lisions LL(1) d’una gramàtica en produccions
+/**#Description=
+Visualitza les col•lisions LL(1) d’una gramàtica en produccions. Aquestes es donen
+quan hi ha produccions del mateix símbol no terminal que els seus conjunts de primers
+no son disjunts. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <terme>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+OK
+CoSeL> gramatica.veureprimersproduccions
+Conjunts de Primers de les produccions:
+Primers(<Expressio> --> <terme> <Expressio_1> )= - ( Numero Identificador
+Primers(<Expressio_1> --> <Expressio_2> <terme> <Expressio_1> )= + -
+Primers(<Expressio_1> --> $)= ) <SCHAR:EOF>
+Primers(<Expressio_2> --> - )= -
+Primers(<Expressio_2> --> + )= +
+Primers(<factor> --> <factor_1> )= - ( Numero Identificador
+Primers(<factor_1> --> Identificador )= Identificador
+Primers(<factor_1> --> Numero )= Numero
+Primers(<factor_1> --> ( <Expressio> ) )= (
+Primers(<factor_1> --> - <factor> )= -
+Primers(<terme> --> <factor> <terme_1> )= Identificador Numero ( -
+Primers(<terme_1> --> <terme_2> <terme> <terme_1> )= * /
+Primers(<terme_1> --> $)= / * ) <SCHAR:EOF> - +
+Primers(<terme_2> --> / )= /
+Primers(<terme_2> --> * )= *
+Ok
+CoSeL> gramatica.veurecollisionsLL1
+Produccions amb intersecció: / *
+    <terme_1> --> <terme_2> <terme> <terme_1>
+    <terme_1> --> $
+Ok
+#/Program
+*/
+
+// NTIndex =====================================================================
+
+Fun [public] g:GramaticaBNF.NTIndex(s)=>found (n<-g.Diccionari,n[1]=:=s) n[0];
+
+
+// ParserError =================================================================
+
+Var [public] ParserErrorLine=Unbound;
+///#Purpose=Línea on s’ha produït l’últim error de compilació
+Var [public] ParserErrorNLin=Unbound;
+///#Purpose=Número de Línea on s’ha produït l’últim error de compilació
+Var [public] ParserErrorNCol=Unbound;
+///#Purpose=Número de columna on s’ha produït l’últim error de compilació
+
+Var [public] ParserErrorException=Unbound;
+///#Purpose=Excepció que s'ha s’ha produït a l’últim error de compilació
+
+Thrower [public] ParserError(args...)=>
+{
+    throw SyntaxError("Error sintàctic: ",args...);
+}
+///#Purpose=Funció que crida el parser quan hi ha un error sintàctic
+
+
+// PaserTree ===================================================================
+
+Var [public] ParserTree=Unbound;
+var [public] NoTerminalActiu=unbound
+
+proc [public] AssociarAtribut(args...)=>
+{
+    var s=strprint(args...);
+    *NoTerminalActiu=*NoTerminalActiu++"\n"++s;    
+}
+
+// SourceParser ================================================================
+
+
+Fun g:GramaticaBNF.SourceParser(scanner=Unbound,main=Unbound)=>
+{
+    Fun ParserCall(c)=>
+    {
+        Var s=intern(strprint("PARSER_",c.Function.Name));
+        c.function=s;
+        /*
+        var nc=NewApply(s,c.NArgs);
+        for (i<-c:Index) nc.Arg(i)=c.Arg(i);
+        nc
+        */
+        c
+    }
+    if (g.Seguents==Unbound) {
+        Throw Exception("Falta calcular els següents de la gramàtica ",g);
+    }
+    if (Scanner==Unbound) {
+        // Crear un escàner estàndard per la gramàtica
+        Scanner=<< <CrearEscanerEstandard(g.Terminals)>() >>;
+    }
+    if (g.Seguents==Unbound) {
+        Throw Exception("Falta calcular el següents de la gramàtica ",g);
+    }
+    Var Prototypes=[];
+    Var Procedures=[];
+    for (rul<-g.Regles) {
+        Var RuleNT=g.NTIndex(rul.Simbol.Exp.Function);
+        Fun PrimerosDe(exp,sig)=>
+        {
+            if (exp==Unbound) g.Seguents[RuleNT];
+            else if (TypeP(Terminal,exp)) [exp.Cat]
+            else if (TypeP(NoTerminal,exp)) {
+                Var s=g.Primers[g.NTIndex(exp.Exp.Function)];
+                if (s.MemberP([])) (s-[[]]) | PrimerosDe(sig,unbound);
+                else s;
+            }
+            else if (exp=:=[]) PrimerosDe(sig,unbound);
+            else if (ApplyFunP(exp,`Concat,2)) {
+                PrimerosDe(exp.Arg(0), << Concat(<exp.Arg(1)>,<sig>) >>)
+            }
+            else if (ApplyFunP(exp,`Optional,1)) {
+                PrimerosDe(exp.Arg(0),unbound) | PrimerosDe(Sig,unbound)
+            }
+            else if (ApplyFunP(exp,`Repeat,1)) {
+                PrimerosDe(exp.Arg(0),unbound) | PrimerosDe(Sig,unbound)
+            }
+            else if (ApplyFunP(exp,`\|,2)) {
+                PrimerosDe(exp.Arg(0),Sig) | PrimerosDe(exp.Arg(1),Sig)
+            }
+            else if (TypeP(SimbolAccio,exp)) PrimerosDe(sig,unbound);
+            else if (exp==`\$) PrimerosDe(sig,unbound);
+            else Throw Exception("No se convertir ", exp);
+        }
+        Fun Gen(exp,sig)=>
+        {
+            //cout.PrintLn("Gen(",exp," )");
+            if (ApplyFunP(exp,`Concat,2)) {
+                Fun f(e)=> {
+                    if (ApplyFunP(e,`Concat,2)) <<
+                        <Gen(e.Arg(0),<< Concat(<e.Arg(1)>,<sig>)>>)>;
+                        <f(e.Arg(1))>
+                   >>
+                   else Gen(e,sig);
+               }
+               << { <f(exp)> } >>
+            }
+            else if (exp=:=[]) << {} >>
+            else if (TypeP(Terminal,exp)) {
+                Fun Asig(p,i)=>
+                {
+                    if (p==[]) << {} >>
+                    else << <p.Head> = USLParams[<i>]; <Asig(p.Tail,i+1)> >>
+                }
+                Fun ReadSymbol()=>
+                {
+                    if (exp.Params==[]) << |USL,USLParams...|= <scanner> >>;
+                    else << {
+                            <Asig(exp.Params,0)>;
+                            |USL,USLParams...|= <scanner>;
+                        } >>;
+                }
+                <<
+                    if (USL== `<exp.Cat>) {
+                        ParserTree=(USL.Name,USLParams)::ParserTree;
+                        <ReadSymbol()>
+                    }
+                    else ParserError("Se esperaba el terminal ", `<exp.Cat>);
+                >>
+            }
+            else if (TypeP(NoTerminal,exp)) ParserCall(exp.exp)
+            else if (ApplyFunP(exp,`Optional,1)) {
+                << if (<PrimerosDe(exp.Arg(0),unbound)>.MemberP(USL)) <Gen(exp.Arg(0),sig)> >>
+            }
+            else if (ApplyFunP(exp,`Repeat,1)) {
+                << while (<PrimerosDe(exp.Arg(0),unbound)>.MemberP(USL)) <Gen(exp.Arg(0),<<Concat(<exp>,<sig>)>>)> >>
+            }
+            else if (ApplyFunP(exp,`\|,2)) {
+                Var PrimersOpcions=[];
+                Fun Cond(e)=>
+                {
+                    if (e.Length>1) << `<e.Head> | <Cond(e.Tail)> >>
+                    else << `<e.Head> >>
+                }
+                Fun f(e)=> {
+                    if (ApplyFunP(e,`\|,2)) {
+                        Var priOp=PrimerosDe(e.Arg(0),sig);
+                        PrimersOpcions=PrimersOpcions | priOp;
+                        <<
+                            <Cond(priOp)> => <Gen(e.Arg(0),sig)>;
+                            <f(e.Arg(1))>
+                        >>
+                    }
+                    else {
+                        Var priOp=PrimerosDe(e,sig);
+                        PrimersOpcions=PrimersOpcions | priOp;
+                        <<
+                            <Cond(priOp)> => <Gen(e,sig)>;
+                            Others => ParserError("Error en selecció. S'esperava ",
+                                                  <PrimersOpcions>);
+                        >>
+                    }
+                }
+                << switch (USL) { <f(exp)>} >>
+            }
+            else if (TypeP(SimbolAccio,exp)) exp.Codi;
+            else if (exp==`\$) << {} >>;
+            else Throw Exception("No se convertir ", exp);
+        }
+        Var dec=ParserCall(rul.Simbol.Exp);
+        Prototypes=<< Proc <dec> >> :: Prototypes;
+        Procedures=<< Proc <dec> => {
+                Var AnteriorNoTerminalActiu=NoTerminalActiu;
+                ParserTree=1::<strprint("<",rul.Simbol.Exp.Function.name,">")>
+                           ::ParserTree;
+                NoTerminalActiu=&ParserTree.Tail.Head;
+                ++NivellDeRecursio;
+                if (NivellDeRecursio>400) throw Exception("Recursió infinita detectada (",NivellDeRecursio,")");
+                <Gen(rul.Expressio,unbound)>;
+                --NivellDeRecursio;
+                ParserTree= -1::ParserTree;
+                NoTerminalActiu=AnteriorNoTerminalActiu;
+            } >> :: Procedures;
+    }
+
+    Fun ListToCommaList(l)=>
+    {
+        if (l.Tail==[]) l.Head;
+        else << <l.Head> ; <ListToCommaList(l.Tail)> >>
+    }
+
+    if (main==Unbound)
+    <<
+        Var USL;
+        Var USLParams;
+        Var NivellDeRecursio=0;
+
+        <ListToCommaList(Prototypes++Procedures)>;
+        //|USL,USLParams...|= <scanner>;
+        //<main>;
+        //if (USL!=EOF) ParserError("Error al final amb ",USL);
+    >>
+    else
+    <<
+        Var USL;
+        Var USLParams;
+        Var NivellDeRecursio=0;
+        <ListToCommaList(Prototypes++Procedures)>;
+        |USL,USLParams...|= <scanner>;
+        ParserTree=[];
+		try {
+			<ParserCall(main)>;
+			if (USL!=EOF) ParserError("Error al final amb ",USL);
+		}
+		catch (ex) {
+			ParserTree=reverse(ParserTree);
+			throw ex;
+		}
+		ParserTree=reverse(ParserTree);
+    >>
+}
+
+// GenerarParser ===============================================================
+
+Proc [public] g:GramaticaBNF.GenerarParser(name:symbol,scanner=Unbound)=>
+{
+    void Execute(<<
+        Proc <name>(FileName:String) =>
+        {
+            ParserErrorNLin=Unbound;
+            ParserErrorLine=Unbound;
+            ParserErrorNCol=Unbound;
+            Var OldScanInput=ScanInput;
+            ScanInput=Open(FileName,SMIn,[],SourcePaths);
+            cout.PrintLN("Analitzant ",FileName);
+            cout.flush();
+            Var Oldline=system$CSLGetScanLineNumber();
+            Var OldNLin=system$CSLGetParserLineNumber();
+            system$CSLSetScanLineNumber(1);
+
+            TRY {
+                <g.SourceParser(scanner,g.Inicial.exp)>;
+                cout.PrintLn("Anàlisi correcta del fitxer ",FileName);
+            }
+            CATCH (ex) {
+                ParserErrorNLin=CSLGetScanLineNumber();
+                ParserErrorLine=system$CSLScanLine();
+                ParserErrorNCol=system$CSLGetScanCharNumber();
+                COut.PrintLn("Error a la linea ",ParserErrorNLin,
+                             " del fitxer ",FileName);
+                COut.PrintLn(ParserErrorLine);
+                for (i<-0 .. min(ParserErrorNCol-1,ParserErrorLine.Length-1))
+                    COut.Print(if (ParserErrorLine[i]=:='\t') '\t'
+                               else ' ');
+                COut.PrintLN("^ ",ex.What);
+            };
+            system$CSLSetParserLineNumber(OldNLin);
+            system$CSLSetScanLineNumber(Oldline);
+            Close(ScanInput);
+            ScanInput=OldScanInput;
+        }
+    >>);
+}
+///#Purpose=Genera el parser de la gramàtica
+/**#Description=
+Genera el parser de la gramàtica amb el nom #c{name} que indiquem. Per defecte utilitza
+un escàner estàndard, però permet especificar la funció que farà d’escàner.
+El parser generat es un procediment que te com paràmetre el fitxer a analitzar.
+Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+Ok
+CoSeL> Gramatica.GenerarParser(`MyParser); // Generar el parser
+OK
+CoSeL> MyParser("Gramatica1_test.txt");    // Analitzar el fitxer Gramatica1_test.txt
+Analitzant Gramatica1_test.txt
+Anàlisi correcta del fitxer Gramatica1_test.txt
+OK
+#/Program
+*/
+
+// VeureArbreSintactic =========================================================
+
+Proc [public] VeureArbreSintactic()=>
+{
+    if (ParserTree==Unbound) {
+        Throw Exception("Falta executar el parser");
+    }
+    var prefijo="";
+    for (e<-reverse(ParserTree)) {
+        switch (e) {
+            1=> {
+                prefijo=prefijo++"  ";
+            }
+            -1=> {
+                prefijo=prefijo[0..prefijo.length-2];
+            }
+            string => cout.PrintLn(prefijo,e);
+            vector => {
+                cout.Print(prefijo,e[0]);
+                if (e[1].length!=0) {
+                    Var params=e[1];
+                    cout.Print("#(",params[0]);
+                    for (i<-1..params.Length-1) cout.Print(",",params[i]);
+                    cout.Print(")");
+                }
+                cout.PrintLn();
+            }
+        }
+    }
+}
+///#Purpose=Visualitza l’arbre sintàctic de l’últim anàlisis sintàctic
+/**#Description=
+Visualitza l’arbre sintàctic de l’últim anàlisis sintàctic que s’ha fet amb un analitzador
+generat. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+Ok
+CoSeL> Gramatica.GenerarParser(`MyParser); // Generar el parser
+OK
+CoSeL> MyParser("Gramatica1_test.txt");    // Analitzar el fitxer Gramatica1_test.txt
+Analitzant Gramatica1_test.txt
+Anàlisi correcta del fitxer Gramatica1_test.txt
+CoSeL> VeureArbreSintactic();              // Veure l’arbre sintàctic
+<Expressio>
+  <terme>
+    <factor>
+      Numero#(10)
+  +
+  <terme>
+    <factor>
+      Identificador#(a)
+  -
+  <terme>
+    <factor>
+      Numero#(20)
+    /
+    <factor>
+      Numero#(30)
+    *
+    <factor>
+      (
+      <Expressio>
+        <terme>
+          <factor>
+            Identificador#(c)
+        +
+        <terme>
+          <factor>
+            Identificador#(d)
+      )
+OK
+#/Program
+*/
+
+// ArbreSintacticAbstracte =====================================================
+
+Fun [public]  ArbreSintacticAbstracte()=>
+{
+    if (ParserTree==Unbound) {
+        Throw Exception("Falta executar el parser");
+    }
+    Var l=reverse(ParserTree);
+    Fun simpl(l)=>
+    {
+        if (TypeP(list,l) && l.length==1) simpl(l.Head);
+        else l;
+    }
+    Fun Tree()=>
+    {
+        Var sl=[];
+        for () {
+            if (l==[]) return simpl(reverse(sl));
+            else if (TypeP(string,l.head)) l=l.Tail;
+            else if (l.Head==1) {
+                l=l.Tail;
+                var t=Tree();
+                if (t!:=[]) sl=t::sl;
+            }
+            else if (l.head==-1) {
+                l=l.Tail;
+                return simpl(reverse(sl));
+            }
+            else {
+                sl=l.Head[0]::sl;
+                l=l.Tail;
+            }
+        }
+        Unbound
+    }
+    Tree();
+}
+///#Purpose=Genera una representació amb llistes de l’arbre sintàctic abstracte
+/**#Description=
+Genera una representació amb llistes de l’arbre sintàctic abstracte corresponen a l’últim
+analisi realitzada. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+Ok
+CoSeL> Gramatica.GenerarParser(`MyParser); // Generar el parser
+OK
+CoSeL> MyParser("Gramatica1_test.txt");    // Analitzar el fitxer Gramatica1_test.txt
+Analitzant Gramatica1_test.txt
+Anàlisi correcta del fitxer Gramatica1_test.txt
+CoSeL> ArbreSintacticAbstracte()
+[Numero,\+,Identificador,\-,[Numero,\/,Numero,\*,[\(,[Identificador,\+,Identificador],\)]]]
+#/Program
+*/
+
+// VeureArbreSintacticAbstracte ================================================
+
+proc [public] VeureArbreSintacticAbstracte(Arbre=Unbound)=>
+{
+    if (Arbre==Unbound) {
+        Arbre=ArbreSintacticAbstracte();
+    }
+    proc ver(ar,sangrado)=>
+    {
+        for (e<-ar) {
+            switch (e) {
+                List => ver(e,sangrado+4);
+                Others => {
+                    for (i<-1..sangrado) cout.Print(' ');
+                    cout.PrintLn(e);
+                }
+            }
+        }
+    }
+    ver(Arbre,0);
+}
+///#Purpose=Visualiza l'arbre sintàctic abstracte
+/**#Description=
+Visualitza l’arbre sintàctic abstracte corresponen a l’últim
+analisi realitzada. També es posible pasar-li per paràmetre l'arbre a visualitzar. Exemple:
+#Program
+CoSeL> Var Gramatica= // La gramàtica es guarda a la variable gramàtica
+BNF_GRAMMAR <Expressio> // Símbol inicial
+TERMINALS + - * / identificador numero ( )  // Terminals
+BNF // Regles BNF
+    Rule <Expressio>  ::= <terme> { (+|-) <terme> }
+    Rule <terme>      ::= <factor> { (*|/) <factor>  }
+    Rule <factor>     ::= - <factor> |
+                            "(" <expressio> ")" |
+                            Numero |
+                            Identificador
+END;
+CoSeL> gramatica.BNFAProduccions
+Ok
+CoSeL> gramatica.CalcularAnullables
+Ok
+CoSeL> gramatica.CalcularPrimers
+OK
+CoSeL> gramatica.CalcularSeguents
+Ok
+CoSeL> Gramatica.GenerarParser(`MyParser); // Generar el parser
+OK
+CoSeL> MyParser("Gramatica1_test.txt");    // Analitzar el fitxer Gramatica1_test.txt
+Analitzant Gramatica1_test.txt
+Anàlisi correcta del fitxer Gramatica1_test.txt
+CoSeL> VeureArbreSintacticAbstracte()
+Numero
++
+Identificador
+-
+    Numero
+    /
+    Numero
+    *
+        (
+            Identificador
+            +
+            Identificador
+        )
+Ok
+#/Program
+*/
+
+// MacroParserScanner ==========================================================
+
+Var [public] ParserGrammar; // Ultima gramática para la que se ha creado un parser
+
+
+Macro [public] MacroParserScanner(main,scanner,terms,rules)=>
+{
+    Var g=CrearGramaticaBNF(main,terms,rules);
+    ParserGrammar=g;
+    g.BNFAProduccions();
+    g.CalcularAnullables();
+    g.CalcularPrimers();
+    g.CalcularSeguents();
+    g.SourceParser(scanner,g.inicial.exp);
+}
+///#Prototype=BNF_PARSER #i{inicial} TERMINALS #i{terminals} BNF #i{Regles BNF} END}
+///#Purpose= Crear un parser de la gramàtica
+/**#Description=
+La macro te associada la següent sintaxis per crear un parser d’una gramàtica BNF:
+#Program
+BNF_PARSER #i{símbol inicial}
+SCANNER #i{crida a l’escàner}
+TERMINALS #i{símbols terminals separats per espais o entre dobles cometes}
+BNF
+    Rule #i{Regla BNF}
+    Rule #i{Regla BNF}
+    #i{...}
+END
+#/Program
+
+Per exemple una calculadora implementada amb una gramàtica molt simple de expressions
+aritmètiques:
+#Program
+Proc Calculadora()=>
+{
+    Var TS=[];
+    Proc SetVar(name,v)=>
+    {
+        Search (ets<-TS,ets[0]==name) ets[1]=v
+        else TS=(name,v)::TS;
+    }
+    Fun GetVar(name)=>
+    {
+        Search (x<-TS,x[0]==name) x[1]
+        else throw Exception("la variable ",name, " no te valor");
+    }
+    for () {
+        cout.Print("CALCULADORA> ");
+        try {
+            Var resultat;
+            BNF_PARSER <inicial(resultat)>
+            SCANNER MyScanner()
+            TERMINALS + - * / ident num ( ) = Sortir
+            BNF
+                Rule <Inicial(&v)>::=
+                    <Expressio(v)> |
+                    Sortir @v=Sortir;
+                Rule <Expressio(&v)>::=
+                    @Var v1;
+                    <terme(v)> {
+                        + <terme(v1)> @v=v+v1; |
+                        - <terme(v1)> @v=v-v1;
+                    }
+                Rule <terme(&v)>::=
+                    @Var v1;
+                    <factor(v)> {
+                        * <factor(v1)>  @v=v*v1;|
+                        / <factor(v1)>  @v=v/v1;
+                   }
+                Rule <factor(&v)>::=
+                    - <factor(v)> @v=-v; |
+                    "(" <expressio(v)> ")" |
+                    Num#(v) |
+                    @Var name; Ident#(name) (
+                        = <Expressio(v)> @SetVar(name,v); |
+                        $ @v=GetVar(name);
+                        )
+            END;
+            if (resultat==Sortir) return;
+            cout.PrintLn(resultat);
+        }
+        catch(ex) {
+            cout.PrintLn("Error: ",ex.what);
+        }
+    }
+}
+#/Program
+*/
+
+// MacroParser =================================================================
+
+
+Macro [public] MacroParser(main,terms,rules)=>
+{
+    Var g=CrearGramaticaBNF(main,terms,rules);
+    ParserGrammar=g;
+    g.BNFAProduccions();
+    g.CalcularAnullables();
+    g.CalcularPrimers();
+    g.CalcularSeguents();
+    g.SourceParser(Unbound,g.inicial.exp);
+}
+///#Prototype=BNF_PARSER #i{inicial} SCANNER #i{crida escàner} TERMINALS #i{terminals} BNF #i{Regles BNF} END}
+///#Purpose= Crear un parser de la gramàtica
+/**#Description=
+La macro te associada la següent sintaxis per crear un parser d’una gramàtica BNF:
+#Program
+BNF_PARSER #i{símbol inicial}
+TERMINALS #i{símbols terminals separats per espais o entre dobles cometes}
+BNF
+    Rule #i{Regla BNF}
+    Rule #i{Regla BNF}
+    #i{...}
+END
+#/Program
+Per mes informació veure (#c{MacroParser}) #c{BNF_PARSER} amb l’opció d’escàner
+*/
+
+// =============================================================================
+// ARBRE SINTACTIC =============================================================
+// =============================================================================
+
+// WriteTree ===================================================================
+
+Proc [public] WriteTree(tree,filename)=>
+{
+	var fp=open(filename,SMOut);
+	for (e<-tree) {
+		if (TypeP(string,e)) fp.PrintLn(fmtReadable,e);
+		else if (TypeP(Vector,e)) fp.PrintLn(fmtReadable,e[0]::[x|x<-e[1]:IndexValue]);
+		else fp.PrintLn(e);
+	}
+	close(fp);
+}
+
+// ReadTree ====================================================================
+
+Fun [public] ReadTree(filename)=>
+{
+	var tree=[];
+	var fp=open(filename,SMIn);
+	for () {
+		var e=fp.getline();
+		if (e==eof || e=="") break;
+		else if (e[0]=='[') {
+			e=eval(instrstream(e).read());
+			e=Vector(e.head,Coerce(vector,e.tail))
+		}
+		else e=instrstream(e).read();
+		tree=e::tree;
+	}
+	reverse(tree);
+}
+
+// ArbreSintacticDeLlistes =====================================================
+
+Fun [public] ArbreSintacticDeLlistes(treeAsList:List)=>
+{
+    Var l=treeAsList;
+    Fun Element(e)=>
+    {
+        switch (e)
+        {
+            string=> strprint("<",e[8..]);
+            vector=>
+            switch (e[0]) {
+                "Identificador"=> strprint("Identificador\n",e[1][0]);
+                "Numero"=>strprint("Numero\n",e[1][0]);
+                "String"=>strprint("String\n",FmtReadable,e[1][0]);
+                "Caracter"=>strprint("Caracter\n",FmtReadable,e[1][0]);
+                string=> strprint(e[0]);
+            }
+        }
+    }
+    Fun Tree()=>
+    {
+        fun hijos()=>
+        {
+            var sl=[];
+            for () {
+                if (l=:=[]) return reverse(sl);
+                switch (l.head) {
+                    -1=> {
+                        l=l.tail;
+                        return reverse(sl);
+                    }
+                    vector=> {
+                        sl=Element(l.head)::sl;
+                        l=l.tail;
+                    }
+                    string=> sl=tree()::sl;
+                }
+            }
+            unbound
+        }
+		if (l==[]) return [];
+        switch (l.head) {
+            string=> {
+                var root=Element(l.head);
+                l=l.tail.tail;
+                root::hijos();
+            }
+            vector=>Element(l.head);
+        }
+    }
+    Tree();
+}
+
+// ArbreSintacticDeLlistesAbstracte ============================================
+
+Fun [public]  ArbreSintacticDeLlistesAbstracte(arbre)=>
+{
+    if (TypeP(Cons,arbre)) {
+        if (arbre.tail=:=[]) [];
+        else if (arbre.length==2 && TypeP(List,arbre.head(1))) {
+            ArbreSintacticDeLlistesAbstracte(arbre.head(1));
+        }
+        else {
+            var a=[arbre.head];
+            for ( h<-arbre.tail) {
+                var r=ArbreSintacticDeLlistesAbstracte(h);
+                if (r!=[]) a=r::a;
+            }
+            if (a.tail=:=[]) [] else reverse(a);
+        }
+    }
+    else arbre
+}
+
+// DisplayTree =================================================================
+
+Proc [public] DisplayTree(DisplayName:string,tree:List,VeureAtributs=true,Abstracte=false)=>
+{
+    var gbd=GraphBookDisplay();
+    gbd.Open(DisplayName,-1,-1,-1,-1,null,false,true);
+    var arbre=ArbreSintacticDeLlistes(tree);
+    if (abstracte) arbre=ArbreSintacticDeLlistesAbstracte(arbre);
+    var gb=GraphBook(false);
+    var gp=gb.NewPage(DisplayName,NULL);
+    Var Sequencia=[];
+    var HTerminal=0;
+    
+    fun MidaSimbol(text,VAtri)=>
+    {
+        if (VAtri) gbd.TextSize(text);
+        else  {
+            var nnl=text.count('\n');
+            if (nnl>0) {
+                var nl=find("\n",text);
+                gbd.TextSize(text[..nl]);
+            }
+            else gbd.TextSize(text); 
+        }
+    }
+    fun mida(arbre)=>
+    {
+        switch (arbre) {
+            string => MidaSimbol(arbre,true);
+            [] => (0,0);
+            cons => {
+                var szhead=midaSimbol(arbre.head,VeureAtributs);
+                if (arbre.tail=:=[]) szhead                
+                else {
+                    var sz=new (0,0);
+                    for (a<-arbre.tail) {
+                        var szh=mida(a);
+                        if (sz[0]!=0) sz[0]=sz[0]+8+szh[0]; else sz[0]=sz[0]+szh[0];
+                        sz[1]=max(sz[1],szh[1]);
+                    }
+                    (max(szhead[0],sz[0]),szhead[1]+sz[1]+12+sz[0]*arbre.tail.length*0.001)
+                }
+            }
+        }
+    }
+    proc DibujarSimbol(posicio,text,VAtri,color1,color2,alin=TAHCenter|TAFCenter|TAVCenter)=>
+    {
+        var nnl=text.count('\n');
+        if (nnl>0) {
+            var nl=find("\n",text);
+            var nt=text[..nl];
+            if (VAtri) {
+                for (i<-0..nnl) nt=nt++"\n";
+                var atrib=text[nl..];
+                gp.Text(posicio,atrib,color2,alin);
+                gp.Text(posicio,nt,color1,alin);
+            }
+            else gp.Text(posicio,nt,color1,alin);
+        }
+        else {
+            gp.Text(posicio,text,color1,alin);
+        }
+    }
+    proc DibujarArbre(arbre,posicio)=>
+    {
+        switch (arbre) {
+            string => {
+                var m=midaSimbol(arbre,true);
+                var PosicioFulla=posicio+(0,m[1]/2);
+                DibujarSimbol(PosicioFulla,arbre,true,(0,0,255),(128,128,255));
+                Sequencia=(posicioFulla,arbre)::Sequencia;
+                HTerminal=max(HTerminal,m[1]);
+            }
+            [] => {}
+            cons => {
+                var headSz=midaSimbol(arbre.head,VeureAtributs);
+                DibujarSimbol(posicio+(0,HeadSz[1]/2),arbre.head,VeureAtributs,(0,0,0),(128,128,128));
+                var m=foldl(\+,0,[mida(h)[0]|h<-arbre.tail])+8*(arbre.tail.length-1);
+                var desp=- m/2;
+                for (h<-arbre.tail) {
+                    var mh=mida(h);
+                    var ph=posicio+(desp+mh[0]/2,HeadSz[1]+12+m*arbre.tail.length*0.001);
+                    gp.Line(posicio+(0,HeadSz[1]),ph,(0,0,0),3);
+                    DibujarArbre(h,ph);
+                    desp=desp+mh[0]+8;
+                }
+            }
+        }
+        var m=mida(arbre);
+    }
+    DibujarArbre(arbre,(0,0));
+    var MidaArbre=mida(arbre);
+    for (e<-Sequencia) {
+        DibujarSimbol((e[0][0],-HTerminal),e[1],true,(0,128,128),(0,64,64),TAHCenter|TAFCenter|TAVTop);
+        DibujarSimbol((e[0][0],MidaArbre[1]+16),e[1],true,(0,128,128),(0,64,64),TAHCenter|TAFCenter|TAVTop);
+        gp.Line(e[0]+(0,Mida(e[1])[1]/2+0),(e[0][0],MidaArbre[1]+16),(0,128,128),1,PSDot);
+    }
+    gbd.Show(gb);
+    gbd.SetZoom(1);
+    gbd.Detach();
+}
+
+Proc [public] DisplayTree(tree:list,VeureAtributs=true,Abstracte=false)=>
+{
+	DisplayTree("Arbre sintàctic",tree,VeureAtributs,Abstracte)
+}
+
+// GraficArbreSintactic ========================================================
+
+proc [public] GraficArbreSintactic(DisplayName:String="Arbre sintàctic",VeureAtributs=true,Abstracte=false)=>
+{
+	DisplayTree(DisplayName, ParserTree,VeureAtributs,Abstracte)
+}
