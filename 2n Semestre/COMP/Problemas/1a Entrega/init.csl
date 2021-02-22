@@ -1,0 +1,113 @@
+Use Com
+var lletres="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+var lletresNoW="abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ";
+var lletresNoH="abcdefgijklmnopqrstuvwxyzABCDEFGIJKLMNOPQRSTUVWXYZ";
+var lletresNoI="abcdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ";
+var lletresNoL="abcdefghijkmnopqrstuvwxyzABCDEFGHIJKMNOPQRSTUVWXYZ";
+var lletresNoE="abcdfghijklmnopqrstuvwxyzABCDFGHIJKLMNOPQRSTUVWXYZ";
+var lletresNoD="abcefghijklmnopqrstuvwxyzABCEFGHIJKLMNOPQRSTUVWXYZ";
+var lletresNoO="abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ";
+var digits="0123456789";
+
+const SimbolNumEnt;
+const SimbolNumDec;
+const SimbolDo;
+const SimbolDoWhile;
+const SimbolId;
+const SimbolImplica;
+
+var AFDScanner = CrearAutomata(1,[(2,SimbolNumDec),(4,SimbolNumEnt),(5,SimbolId),(6,SimbolId),(7,SimbolDo),(8,SimbolId),(9,SimbolId),(10,SimbolId),(11,SimbolId),(12,SimbolId),(13,SimbolDoWhile),(16,SimbolImplica)],[
+(1,digits,2),
+(1,".",3),
+(1,lletresNoD,5),
+(2,digits,2),
+(2,".",3),
+(3,digits,4),
+(4,digits,4),
+(5,lletres++digits,5),
+(1,"d",6),
+(6,"o",7),
+(6,digits++lletresNoO,5),
+(7,"_",8),
+(7,digits++lletresNoL,5),
+(8,"w",9),
+(8,digits++lletresNoW,5),
+(9,"h",10),
+(9,digits++lletresNoH,5),
+(10,"i",11),
+(10,digits++lletresNoI,5),
+(11,"l",12),
+(11,digits++lletresNoL,5),
+(12,"e",13),
+(12,digits++lletresNoE,5),
+(13,digits++lletres,5),
+(1,"=",14),
+(14,"=",15),
+(15,">",16)
+]);
+
+cout.printLn();
+var AFDScanner = AFDScanner.AutomataDeterminista();
+AFDScanner.AnomenarEstats();
+AFDScanner.VeureAutomat();
+cout.printLn();
+cout.printLn("Scanner Fora#");
+cout.printLn();
+
+cout.printLn("TESTS CORRECTES NUMDEC");
+cout.printLn();
+AFDScanner.ScannerSequencia("0");
+cout.printLn();
+AFDScanner.ScannerSequencia("10");
+cout.printLn();
+AFDScanner.ScannerSequencia("57393028437857");
+cout.printLn();
+cout.printLn("TESTS CORRECTES NUMENT");
+cout.printLn();
+AFDScanner.ScannerSequencia("3.4");
+cout.printLn();
+AFDScanner.ScannerSequencia("0.34");
+cout.printLn();
+AFDScanner.ScannerSequencia(".90");
+cout.printLn();
+cout.printLn("TESTS CORRECTES ID");
+cout.printLn();
+AFDScanner.ScannerSequencia("a");
+AFDScanner.ScannerSequencia("a0g3d2ef321");
+AFDScanner.ScannerSequencia("ascbte");
+cout.printLn();
+cout.printLn("TESTS CORRECTES DO-DO_WHILE");
+cout.printLn();
+AFDScanner.ScannerSequencia("do");
+AFDScanner.ScannerSequencia("do_while");
+AFDScanner.ScannerSequencia("domenech");
+cout.printLn();
+cout.printLn("TESTS CORRECTES ==>");
+cout.printLn();
+AFDScanner.ScannerSequencia("==>");
+cout.printLn();
+cout.printLn("TESTS INCORRECTES NUMDEC");
+cout.printLn();
+AFDScanner("-9");
+cout.printLn();
+cout.printLn("TESTS INCORRECTES NUMENT");
+cout.printLn();
+AFDScanner.ScannerSequencia(".");
+cout.printLn();
+cout.printLn("TESTS INCORRECTES ID");
+cout.printLn();
+AFDScanner.ScannerSequencia("0abcde");
+cout.printLn();
+cout.printLn("TESTS INCORRECTES DO-DO_WHILE");
+cout.printLn();
+AFDScanner.ScannerSequencia("dowhile");
+AFDScanner.ScannerSequencia("doremi");
+cout.printLn();
+cout.printLn("TESTS INCORRECTES ==>");
+cout.printLn();
+AFDScanner.ScannerSequencia("=>");
+AFDScanner.ScannerSequencia("==<");
+cout.printLn();
+
+
+
