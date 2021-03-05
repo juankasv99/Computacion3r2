@@ -27,3 +27,5 @@ figure, hold on
 plot(acum(120,:,1)), plot(acum(120,:,50)), plot(acum(120,:,100)), plot(fsr(120,:,1), "LineWidth", 2.0)
 legend({"frame_{1}","frame_{50}", "frame_{100}", "mean"})
 axis([250, 730, 190, 230])
+
+algo = max(fsr)/std(fr-fsr);
