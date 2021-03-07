@@ -18,7 +18,7 @@ for i=2:N
     frame_fosc = rgb2gray(readFrame(video_fosc));
     acum_fosc(:,:,i) = frame_fosc(1:2:end, 1:2:end, 1);
 end
-fsr_llum = sum(acum_llum(:,:,1:100),3)/(N/2); %vs
+fsr_llum = sum(acum_llum(:,:,1:100),3)/(N/2);
 fsr_fosc = sum(acum_fosc(:,:,1:100),3)/(N/2);
 
 fhdr_llum = sum(acum_llum(:,:,101:200),3);
@@ -28,10 +28,10 @@ fhdr_fosc = sum(acum_fosc(:,:,101:200),3);
 fr_fosc = acum_fosc(:,:,101);
 
 ruido_llum = fr_llum-fsr_llum;
-ruidohdr_llum = fhdr_llum-fsr_llum;
+ruidohdr_llum = fhdr_llum-(fsr_llum*100);
 
 ruido_fosc = fr_fosc-fsr_fosc;
-ruidohdr_fosc = fhdr_fosc-fsr_fosc;
+ruidohdr_fosc = fhdr_fosc-(fsr_fosc*100);
 
 
 figure, hold on
@@ -52,9 +52,7 @@ plot(acum_fosc(120,:,1)), plot(acum_fosc(120,:,50)), plot(acum_fosc(120,:,100)),
 legend({"frame_{1}","frame_{50}", "frame_{100}", "mean"})
 axis([250, 750, 0, 55])
 
-%soroll_llum = max(fsr_llum)/std(ruido_llum);
-%soroll_fosc = max(fsr_fosc)/std(ruido_fosc);
-soroll_llum = 255/(2*std2(ruido_llum))
-soroll_fosc = 255/(2*std2(ruido_fosc))
-soroll_llum_rang = 25500 / (2*std2(fr_llum-fhdr_llum))
-soroll_fosc_rang = 25500 / (2*std2(fr_fosc-fhdr_fosc))
+soroll_llum = 255/(2*std2(ruido_llum));
+soroll_fosc = 255/(2*std2(ruido_fosc));
+soroll_llum_rang = 25500 / (2*std2(fhdr_llum-(fsr_llum*100)));
+soroll_fosc_rang = 25500 / (2*std2(fhdr_fosc-(fsr_fosc*100)));
