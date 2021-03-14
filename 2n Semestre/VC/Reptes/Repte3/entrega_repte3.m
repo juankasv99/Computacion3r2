@@ -4,22 +4,6 @@ figure(1);
 imshow(im);
 title('Imatge original', 'fontsize', 15);
 
-% MODEL CONVN + FILT EN COLOR
-
-m = 0;
-s = 8;
-x = -3 * s : 3 * s;
-g = (1/(s * sqrt(2 * pi))) * exp(-0.5 * ((x - m) / s) .^ 2);
-g = g / sum(g(:));
-g2 = g' * g;
-
-ims = convn(double(im), g2, "full");
-ims = imfilter(im, g2, "same", "circular");
-
-figure(2);
-imshow(ims);
-title('Imatge filtrada amb color','fontsize',14);
-
 % MODEL FOURIER RGB
 
 R = im(:,:,1);
@@ -56,7 +40,7 @@ resultB = ifft2(lowPassB1);
 
 RGBResult = uint8(cat(3, resultR, resultG, resultB));
 
-figure(3);
+figure(2);
 subplot(1,3,1);
 imshow(abs(AR1),[-12 300000]);
 title('fft del canal vermell','fontsize',15);
@@ -67,7 +51,7 @@ subplot(1,3,3);
 imshow(abs(AB1),[-12 300000]);
 title('fft del canal blau','fontsize',15);
 
-figure(4);
+figure(3);
 subplot(1,3,1);
 imshow(abs(resultR),[12 290]);
 title('Resultat canal Vermell', 'fontsize', 15);
@@ -78,31 +62,6 @@ subplot(1,3,3);
 imshow(abs(resultB),[12 290]);
 title('Resultat canal Blau', 'fontsize', 15);
 
-figure(5);
+figure(4);
 imshow(RGBResult,[]);
 title('Resultat RGB', 'fontsize', 15);
-
-
-% MODEL FOURIER GREYSCALE
-
-imGray = rgb2gray(im);
-
-firstIter = fft2(double(imGray));
-firstIter1 = fftshift(firstIter);
-
-[M N]=size(firstIter);
-r=20;
-x=0:N-1;
-y=0:M-1;
-[x y]=meshgrid(x,y);
-cx=0.5*N;
-cy=0.5*M;
-lowFilter=exp(-((x-cx).^2+(y-cy).^2)./(2*r).^2);
-
-filtered=firstIter1.*lowFilter;
-filtered1=ifftshift(filtered);
-filtResult=ifft2(filtered1);
-
-figure(6);
-imshow(abs(filtResult),[12 290]);
-title('Resultat Fourier blanc i negre', 'fontsize', 15);
