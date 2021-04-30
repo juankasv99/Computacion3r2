@@ -131,16 +131,32 @@ Mdl = fitcsvm(train(:,1:75),train(:,76),'OptimizeHyperparameters','auto');
 prediction3 = predict(Mdl,test(:,1:75));
 
 midaImg = size(im, 1:2);
+finalData = zeros((midaImg(1)-4)*(midaImg(2)-4),76);
 
-for i = 3:midaImg-2
-    for j = 3:midaImg-2
+for i = 3:midaImg(1)-2
+    for j = 3:midaImg(2)-2
         %tmp = im( y1(i)-2:y1(i)+2, x1(i)-2:x1(i)+2, : );
         tmp = im(j-2:j+2, i-2:i+2, :);
         tmp = reshape(tmp, [1 75]);
-        finalData(
+        finalData((midaImg(1)-4)*(i-3)+j-2,1:75) = tmp;
     end
     
 end
+
+predictionFinal = predict(Mdl,finalData(:,1:75));
+finalData(:,76) = predictionFinal(:);
+
+imageBW = reshape(finalData(:,76),midaImg(1)-4,midaImg(2)-4);
+cropIm = im(3:midaImg(1)-2,3:midaImg(2)-2,:);
+
+imBosc = cropIm .* imageBW;
+figure(3)
+imshow(imBosc,[]);
+imageBW1 = imageBW;
+imageBW1(
+imNoBosc = cropIm .* (imageBW .* -1);
+figure(4)
+imshow(imNoBosc,[]);
 
 
 
