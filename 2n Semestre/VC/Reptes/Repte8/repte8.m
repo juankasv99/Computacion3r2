@@ -78,7 +78,7 @@ hold off;
 
 %train/test split
 %(x,y,,label);
-%1 = bosc, 2 = no bosc
+%0 = bosc, 1 = no bosc
 
 train = zeros(100, 76);
 test = zeros(100, 76);
@@ -106,29 +106,32 @@ end
 toc
 
 train(1:50,1:75) = data1(1:50,:);
-train(1:50,76) = 1;
+train(1:50,76) = 0;
 train(51:100,1:75) = data2(51:100,:);
-train(51:100,76) = 2;
+train(51:100,76) = 1;
 
 test(1:50,1:75) = data1(51:100,:);
-test(1:50,76) = 1;
+test(1:50,76) = 0;
 test(51:100,1:75) = data2(1:50,:);
-test(51:100,76) = 2;
+test(51:100,76) = 1;
 
 %IDA
 
 MdlLinear = fitcdiscr(train(:,1:75),train(:,76));
 prediction1 = predict(MdlLinear,test(:,1:75));
+cm(1) = confusionchart(test(:,76),prediction1);
 
 %NaiveBayes
 
 Mdl = fitcnb(train(:,1:75),train(:,76));
 prediction2 = predict(Mdl,test(:,1:75));
+cm(2) = confusionchart(test(:,76),prediction2);
 
 %SVM
 
-Mdl = fitcsvm(train(:,1:75),train(:,76),'OptimizeHyperparameters','auto');
+Mdl = fitcsvm(train(:,1:75),train(:,76));%,'OptimizeHyperparameters','auto');
 prediction3 = predict(Mdl,test(:,1:75));
+cm(3) = confusionchart(test(:,76),prediction3);
 
 midaImg = size(im, 1:2);
 finalData = zeros((midaImg(1)-4)*(midaImg(2)-4),76);
@@ -153,8 +156,18 @@ imBosc = cropIm .* imageBW;
 figure(3)
 imshow(imBosc,[]);
 imageBW1 = imageBW;
-imageBW1(
-imNoBosc = cropIm .* (imageBW .* -1);
+
+for i = 1:size(imageBW1,1)
+    for j = 1:size(imageBW1,2)
+        if imageBW1(i,j)==1
+            imageBW1(i,j)=0;
+        else
+            imageBW1(i,j)=1;
+        end
+    end
+end
+
+imNoBosc = cropIm .* imageBW1;
 figure(4)
 imshow(imNoBosc,[]);
 
