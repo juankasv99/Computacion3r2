@@ -4,7 +4,7 @@ clc
 
 im = im2double(imread("https://geoserveis.icgc.cat/icc_mapesbase/wms/service?REQUEST=GetMap&VERSION=1.1.0&SERVICE=WMS&SRS=EPSG:25831&BBOX=333773,4698340,334409,4699126&WIDTH=1024&HEIGHT=1024&LAYERS=orto25c&STYLES=&FORMAT=image/jpeg&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&EXCEPTION=INIMAGE"));
 
-% % %selecció de punts
+% % % % %selecció de punts
 % x1 = []; x2 = [];
 % y1 = []; y2 = [];
 % 
@@ -119,19 +119,27 @@ test(51:100,76) = 1;
 
 MdlLinear = fitcdiscr(train(:,1:75),train(:,76));
 prediction1 = predict(MdlLinear,test(:,1:75));
+figure(3)
 cm(1) = confusionchart(test(:,76),prediction1);
+acc(1) = calcAcc(cm(1).NormalizedValues);
 
 %NaiveBayes
 
 Mdl = fitcnb(train(:,1:75),train(:,76));
 prediction2 = predict(Mdl,test(:,1:75));
+figure(4)
 cm(2) = confusionchart(test(:,76),prediction2);
+acc(2) = calcAcc(cm(2).NormalizedValues);
 
 %SVM
 
-Mdl = fitcsvm(train(:,1:75),train(:,76));%,'OptimizeHyperparameters','auto');
+Mdl = fitcsvm(train(:,1:75),train(:,76),'OptimizeHyperparameters','auto');
 prediction3 = predict(Mdl,test(:,1:75));
+figure(5)
 cm(3) = confusionchart(test(:,76),prediction3);
+acc(3) = calcAcc(cm(3).NormalizedValues);
+
+dispAcc(acc);
 
 midaImg = size(im, 1:2);
 finalData = zeros((midaImg(1)-4)*(midaImg(2)-4),76);
@@ -153,7 +161,7 @@ imageBW = reshape(finalData(:,76),midaImg(1)-4,midaImg(2)-4);
 cropIm = im(3:midaImg(1)-2,3:midaImg(2)-2,:);
 
 imBosc = cropIm .* imageBW;
-figure(3)
+figure(6)
 imshow(imBosc,[]);
 imageBW1 = imageBW;
 
@@ -168,9 +176,25 @@ for i = 1:size(imageBW1,1)
 end
 
 imNoBosc = cropIm .* imageBW1;
-figure(4)
+figure(7)
 imshow(imNoBosc,[]);
 
+figure(8)
+imshow(imageBW);
+figure(9)
+imshow(imageBW1);
 
 
+function accuracy = calcAcc(cm)
+accuracy = (cm(1,1) + cm(2,2)) / (cm(1,1)+cm(1,2)+cm(2,1)+cm(2,2)); 
+end
 
+function dispAcc(acc)
+nameList = ["IDA", "NaiveBayes", "SVM"];
+disp("=====ACCURACY======");
+for i=1:3
+    disp(nameList(i) + " -> " + acc(i));
+end
+disp("===================");
+
+end
